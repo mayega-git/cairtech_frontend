@@ -16,6 +16,8 @@ public interface JwtIssuer {
             Set<String> roles,
             Set<String> permissions,
             UUID bibleClubId,
+            String firstNames,
+            String nextNames,
             Instant issuedAt,
             Instant expiresAt
     ) {}

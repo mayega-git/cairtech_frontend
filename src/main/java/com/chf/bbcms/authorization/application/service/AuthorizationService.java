@@ -44,4 +44,17 @@ public class AuthorizationService {
                 })
                 .map(set -> (Set<String>) Set.copyOf(set));
     }
+
+    /**
+     * Noms des rôles actifs (utilisés pour l'UI : afficher le badge "Leader BBC",
+     * "Mentor", etc.). N'affecte pas l'autorisation effective (basée permissions).
+     */
+    public Mono<Set<String>> roleNamesOf(UUID userAccountId) {
+        return assignmentRepository.findActiveByUser(userAccountId)
+                .map(UserRoleAssignment::getRoleId)
+                .collectList()
+                .flatMapMany(roleRepository::findByIds)
+                .map(Role::getName)
+                .collect(java.util.stream.Collectors.toSet());
+    }
 }

@@ -8,25 +8,53 @@ import '../../features/auth/presentation/change_password_page.dart';
 import '../../features/auth/presentation/forgot_password_page.dart';
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/reset_password_page.dart';
+import '../../features/dashboard/presentation/home_tab.dart';
+import '../../features/meetings/presentation/meetings_tab.dart';
+import '../../features/members/presentation/members_tab.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
+import '../../features/profile/presentation/profile_tab.dart';
+import '../../features/publications/presentation/spiritual_tab.dart';
+import '../../features/shell/presentation/app_shell.dart';
+import '../../features/shell/presentation/feature_stub_page.dart';
 import '../../features/shell/presentation/widget_gallery_page.dart';
 
 /// Routes nommées centralisées.
 class AppRoutes {
   AppRoutes._();
+
+  // Public
   static const splash = '/';
   static const login = '/login';
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const activate = '/activate';
   static const onboarding = '/onboarding';
+
+  // Tabs (shell)
   static const home = '/home';
+  static const meetings = '/meetings';
+  static const members = '/members';
+  static const spiritual = '/spiritual';
+  static const profile = '/profile';
+
+  // Other routes
   static const gallery = '/_gallery';
   static const changePassword = '/me/change-password';
+
+  // Leader / admin routes (drawer)
+  static const membershipRequests = '/admin/membership-requests';
+  static const adminBibleClubs = '/admin/bible-clubs';
+  static const events = '/events';
+  static const evangelism = '/evangelism';
+  static const discipleship = '/discipleship';
+  static const finance = '/finance';
+  static const publications = '/publications';
+  static const nationalDashboard = '/admin/dashboard';
 }
 
 GoRouter buildRouter() {
   final auth = sl<AuthBloc>();
+  final shellNavKey = GlobalKey<NavigatorState>();
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -53,6 +81,7 @@ GoRouter buildRouter() {
       return null;
     },
     routes: [
+      // ── Public ─────────────────────────────────────────────────────
       GoRoute(path: AppRoutes.splash, builder: (_, __) => const _SplashPage()),
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginPage()),
       GoRoute(
@@ -61,27 +90,155 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.resetPassword,
-        builder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          return ResetPasswordPage(token: token);
-        },
+        builder: (context, state) => ResetPasswordPage(
+          token: state.uri.queryParameters['token'] ?? '',
+        ),
       ),
       GoRoute(
         path: AppRoutes.activate,
-        builder: (context, state) {
-          final token = state.uri.queryParameters['token'] ?? '';
-          return ActivationPage(token: token);
-        },
+        builder: (context, state) => ActivationPage(
+          token: state.uri.queryParameters['token'] ?? '',
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, __) => const OnboardingPage(),
       ),
-      GoRoute(path: AppRoutes.home, builder: (_, __) => const WidgetGalleryPage()),
-      GoRoute(path: AppRoutes.gallery, builder: (_, __) => const WidgetGalleryPage()),
+
+      // ── Authenticated shell (5 tabs) ───────────────────────────────
+      StatefulShellRoute.indexedStack(
+        parentNavigatorKey: shellNavKey,
+        builder: (context, state, shell) => AppShell(shell: shell),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: AppRoutes.home,
+                builder: (_, __) => const HomeTabPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: AppRoutes.meetings,
+                builder: (_, __) => const MeetingsTabPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: AppRoutes.members,
+                builder: (_, __) => const MembersTabPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: AppRoutes.spiritual,
+                builder: (_, __) => const SpiritualTabPage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: AppRoutes.profile,
+                builder: (_, __) => const ProfileTabPage()),
+          ]),
+        ],
+      ),
+
+      // ── Other authenticated routes ────────────────────────────────
+      GoRoute(
+        path: AppRoutes.gallery,
+        builder: (_, __) => const WidgetGalleryPage(),
+      ),
       GoRoute(
         path: AppRoutes.changePassword,
         builder: (_, __) => const ChangePasswordPage(),
+      ),
+
+      // ── Leader stubs (drawer destinations) ─────────────────────────
+      GoRoute(
+        path: AppRoutes.membershipRequests,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'COMPTES & INSCRIPTIONS',
+          title: 'Demandes d\'adhésion',
+          subtitle:
+              'Liste des demandes en attente, approbation avec assignation '
+              'BBC+niveau, rejet motivé — Phase 5.',
+          icon: Icons.how_to_reg_outlined,
+          roadmap: 'Phase 5 — Membres + Adhésions',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.adminBibleClubs,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'ORGANISATION',
+          title: 'Gestion des Bible Clubs',
+          subtitle:
+              'CRUD BBC, niveaux L1..L7, triumvirat, reset annuel — Phase 11.',
+          icon: Icons.school_outlined,
+          roadmap: 'Phase 11 — Admin Leader National',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.events,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'ÉVÉNEMENTS NATIONAUX',
+          title: 'Congrès, sommets, conférences',
+          subtitle: 'Planification, inscription, présence — Phase 9.',
+          icon: Icons.event_outlined,
+          roadmap: 'Phase 9 — Événements',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.evangelism,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'MISSION',
+          title: 'Évangélisation',
+          subtitle:
+              'Programmes, comptes rendus journaliers, objectifs croyants — Phase 8.',
+          icon: Icons.send_outlined,
+          roadmap: 'Phase 8 — Évangélisation + Discipulat',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.discipleship,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'MISSION',
+          title: 'Discipulat',
+          subtitle:
+              'Liens disciple ↔ disciple maker, comptes rendus modules — Phase 8.',
+          icon: Icons.menu_book,
+          roadmap: 'Phase 8 — Évangélisation + Discipulat',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.finance,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'COLLECTES',
+          title: 'Finance',
+          subtitle:
+              'Contributions, versements (Cash/MTN/Orange/Virement), '
+              '% objectif — Phase 7.',
+          icon: Icons.account_balance_wallet_outlined,
+          roadmap: 'Phase 7 — Finance',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.publications,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'PUBLICATIONS',
+          title: 'Daily Verse & annonces',
+          subtitle:
+              'Édition et planification des versets quotidiens + annonces '
+              'spéciales — Phase 6.',
+          icon: Icons.campaign_outlined,
+          roadmap: 'Phase 6 — Vie spirituelle',
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.nationalDashboard,
+        builder: (_, __) => const FeatureStubPage(
+          eyebrow: 'PILOTAGE',
+          title: 'Vue nationale CHF',
+          subtitle:
+              'Total membres actifs, classement BBC, carte des provinces — '
+              'Phase 3 (dashboards).',
+          icon: Icons.public,
+          roadmap: 'Phase 3 — Dashboards',
+        ),
       ),
     ],
   );

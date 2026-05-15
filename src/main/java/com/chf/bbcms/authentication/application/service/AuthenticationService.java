@@ -93,6 +93,7 @@ public class AuthenticationService implements AuthenticationUseCase {
 
     private Mono<TokenPair> issueTokenPair(UserAccount account) {
         Mono<Set<String>> permissionsMono = authorizationService.permissionsOf(account.getId());
+        Mono<Set<String>> rolesMono = authorizationService.roleNamesOf(account.getId());
         // Récupère le bibleClubId du Member STUDENT (si l'utilisateur en a un).
         // Pour PROFESSIONAL/MENTOR/NATIONAL_LEADER/SYSTEM_ADMIN: pas de scope BBC unique
         // → Mono empty → bibleClubId restera null dans le JWT.
@@ -101,10 +102,14 @@ public class AuthenticationService implements AuthenticationUseCase {
         Mono<java.util.UUID> bibleClubIdMono = memberRepository.findByUserAccountId(account.getId())
                 .flatMap(m -> Mono.justOrEmpty(m.getBibleClubId()));
 
-        return Mono.zip(permissionsMono, bibleClubIdMono.defaultIfEmpty(new java.util.UUID(0L, 0L)))
+        return Mono.zip(
+                        permissionsMono,
+                        rolesMono,
+                        bibleClubIdMono.defaultIfEmpty(new java.util.UUID(0L, 0L)))
                 .flatMap(tuple -> {
                     Set<String> permissions = tuple.getT1();
-                    java.util.UUID rawBbcId = tuple.getT2();
+                    Set<String> roles = tuple.getT2();
+                    java.util.UUID rawBbcId = tuple.getT3();
                     java.util.UUID bibleClubId = (rawBbcId.getMostSignificantBits() == 0L
                             && rawBbcId.getLeastSignificantBits() == 0L) ? null : rawBbcId;
 
@@ -112,9 +117,11 @@ public class AuthenticationService implements AuthenticationUseCase {
                             account.getId(),
                             account.getEmail(),
                             account.getUserType().name(),
-                            Set.of(),
+                            roles,
                             permissions,
                             bibleClubId,
+                            account.getProfile().firstNames(),
+                            account.getProfile().nextNames(),
                             Instant.now(),
                             Instant.now().plus(accessTtl)
                     );

@@ -50,6 +50,8 @@ public class JjwtIssuer implements JwtIssuer {
                 .claim("roles", claims.roles())
                 .claim("permissions", claims.permissions())
                 .claim("bibleClubId", claims.bibleClubId() == null ? null : claims.bibleClubId().toString())
+                .claim("firstNames", claims.firstNames())
+                .claim("nextNames", claims.nextNames())
                 .signWith(signingKey)
                 .compact();
     }
@@ -67,6 +69,8 @@ public class JjwtIssuer implements JwtIssuer {
                     toSet(c.get("roles", List.class)),
                     toSet(c.get("permissions", List.class)),
                     bbcId == null ? null : UUID.fromString(bbcId),
+                    c.get("firstNames", String.class),
+                    c.get("nextNames", String.class),
                     c.getIssuedAt().toInstant(),
                     c.getExpiration().toInstant()
             );
