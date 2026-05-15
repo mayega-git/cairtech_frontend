@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!--
+        Phase 6: Synchronisation offline + push tokens.
+        Permet aux clients mobiles/desktop de récupérer les deltas depuis leur
+        dernier sync et de pousser leurs changements locaux.
+    -->
+
+    <changeSet id="19-device-token" author="bbcms">
+        <createTable tableName="bbcms_device_token">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_dt_user"
+                             references="bbcms_user_account(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="token" type="VARCHAR(500)"><constraints nullable="false"/></column>
+            <!-- ANDROID / IOS / WEB / DESKTOP -->
+            <column name="platform" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="device_label" type="VARCHAR(150)"/>
+            <column name="last_seen_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="bbcms_device_token"
+                             columnNames="user_account_id, token"
+                             constraintName="uk_device_user_token"/>
+        <createIndex tableName="bbcms_device_token" indexName="ix_device_user">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="19-sync-cursor" author="bbcms">
+        <!--
+            Curseur par utilisateur+device permettant à un client offline de reprendre
+            une synchronisation incrémentale. Stocke le dernier updated_at vu par le client.
+        -->
+        <createTable tableName="bbcms_sync_cursor">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_sc_user"
+                             references="bbcms_user_account(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="device_id" type="VARCHAR(150)"><constraints nullable="false"/></column>
+            <column name="entity_kind" type="VARCHAR(40)"><constraints nullable="false"/></column>
+            <column name="last_synced_at" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="bbcms_sync_cursor"
+                             columnNames="user_account_id, device_id, entity_kind"
+                             constraintName="uk_sc_user_device_kind"/>
+    </changeSet>
+
+</databaseChangeLog>

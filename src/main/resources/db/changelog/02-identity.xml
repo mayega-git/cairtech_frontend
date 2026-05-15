@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!--
+        Source de vérité PII = bbcms_user_account.
+        bbcms_member (Phase 2) ne dupliquera PAS first_names/gender/etc.
+    -->
+
+    <changeSet id="02-user-account" author="bbcms">
+        <createTable tableName="bbcms_user_account">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(150)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)"><constraints nullable="false"/></column>
+            <column name="phone" type="VARCHAR(20)"/>
+            <!-- PENDING / ACTIVE / SUSPENDED / REMOVED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <!-- VISITOR / STUDENT / PROFESSIONAL / NATIONAL_LEADER -->
+            <column name="user_type" type="VARCHAR(20)" defaultValue="VISITOR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_login_at" type="TIMESTAMPTZ"/>
+            <column name="locale" type="VARCHAR(8)" defaultValue="fr"/>
+
+            <!-- UserProfile (composé, source de vérité PII) -->
+            <column name="first_names" type="VARCHAR(100)"><constraints nullable="false"/></column>
+            <column name="next_names" type="VARCHAR(100)"/>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="gender" type="VARCHAR(10)"/>
+            <column name="date_born_again" type="DATE"/>
+            <column name="how_born_again" type="TEXT"/>
+            <column name="date_entered" type="DATE"/>
+            <column name="picture_file_id" type="UUID"/>
+
+            <!-- RGPD: anonymisation -->
+            <column name="anonymized_at" type="TIMESTAMPTZ"/>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_user_account" indexName="ix_user_account_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="02-membership-request" author="bbcms">
+        <createTable tableName="bbcms_membership_request">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mreq_user"
+                             references="bbcms_user_account(id)"/>
+            </column>
+            <!-- STUDENT / PROFESSIONAL / NATIONAL_LEADER -->
+            <column name="requested_type" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="bible_club_id" type="UUID"/>
+            <column name="level_id" type="UUID"/>
+            <column name="profession" type="VARCHAR(150)"/>
+            <!-- PENDING / APPROVED / REJECTED / CANCELLED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="decision_by" type="UUID"/>
+            <column name="decision_at" type="TIMESTAMPTZ"/>
+            <column name="decision_comment" type="TEXT"/>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_membership_request" indexName="ix_mreq_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="bbcms_membership_request" indexName="ix_mreq_user">
+            <column name="user_account_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="02-activation-token" author="bbcms">
+        <createTable tableName="bbcms_activation_token">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_act_user"
+                             references="bbcms_user_account(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="token" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="used" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="02-password-reset-token" author="bbcms">
+        <createTable tableName="bbcms_password_reset_token">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_prt_user"
+                             references="bbcms_user_account(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="token" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="used" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="02-refresh-token" author="bbcms">
+        <createTable tableName="bbcms_refresh_token">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_rt_user"
+                             references="bbcms_user_account(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="token_hash" type="VARCHAR(120)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="revoked" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,75 @@
+code,description
+bbcms:auth:login,Se connecter
+bbcms:auth:logout,Se déconnecter
+bbcms:auth:refresh,Rafraîchir le JWT
+bbcms:auth:reset-password,Réinitialiser son mot de passe
+bbcms:auth:change-password,Changer son mot de passe
+bbcms:role:create,Créer un rôle
+bbcms:role:update,Modifier un rôle
+bbcms:role:delete,Supprimer un rôle
+bbcms:role:read,Lister/consulter les rôles
+bbcms:role:assign,Assigner un rôle à un utilisateur
+bbcms:user-account:create,Créer un compte utilisateur
+bbcms:user-account:read,Consulter un compte utilisateur
+bbcms:user-account:update,Mettre à jour un compte
+bbcms:user-account:delete,Supprimer un compte
+bbcms:user-account:read-self,Consulter son propre profil
+bbcms:user-account:update-self,Modifier son propre profil
+bbcms:membership-request:submit,Soumettre une demande d'adhésion
+bbcms:membership-request:approve,Approuver une demande d'adhésion
+bbcms:membership-request:reject,Rejeter une demande d'adhésion
+bbcms:membership-request:read,Consulter les demandes d'adhésion
+bbcms:bible-club:create,Créer un Bible Club
+bbcms:bible-club:update,Modifier un Bible Club
+bbcms:bible-club:delete,Supprimer un Bible Club
+bbcms:bible-club:read,Consulter un Bible Club
+bbcms:bible-club:read-partial,Consulter les infos partielles d'autres BBC
+bbcms:bible-club:set-goal,Définir l'objectif annuel d'un BBC
+bbcms:bible-club:assign-leader,Assigner les leaders internes d'un BBC
+bbcms:bible-club:reset,Réinitialiser un BBC en début d'année
+bbcms:level:create,Créer un niveau (L1..L7)
+bbcms:level:update,Modifier un niveau
+bbcms:level:delete,Supprimer un niveau
+bbcms:level:read,Consulter les niveaux
+bbcms:member:create,Créer un membre (post-approbation)
+bbcms:member:update,Modifier un membre
+bbcms:member:read,Consulter un membre
+bbcms:member:delete,Supprimer un membre
+bbcms:member:transfer,Transférer un membre (niveau / BBC)
+bbcms:member:leave,Quitter un BBC (auto-suppression)
+bbcms:professional:manage,Gérer les professionnels (ajout/retrait)
+bbcms:mentor:manage,Gérer les mentors et leur affectation BBC
+bbcms:national-leader:manage,Gérer les leaders nationaux CHF
+bbcms:meeting:plan,Planifier une réunion
+bbcms:meeting:start,Démarrer une réunion
+bbcms:meeting:end,Clôturer une réunion
+bbcms:meeting:record,Enregistrer la présence et clôturer (RECORDED)
+bbcms:meeting:cancel,Annuler une réunion
+bbcms:meeting:read,Consulter une réunion
+bbcms:meeting:notify,Notifier les membres éligibles
+bbcms:event:plan,Planifier un événement national
+bbcms:event:enroll,S'inscrire à un événement
+bbcms:event:record-presence,Enregistrer la présence à un événement
+bbcms:event:read,Consulter un événement
+bbcms:evangelism:program-create,Créer un programme d'évangélisation
+bbcms:evangelism:record-create,Saisir un compte rendu d'évangélisation
+bbcms:evangelism:read,Consulter l'évangélisation
+bbcms:discipleship:assign,Affecter un disciple à un disciple maker
+bbcms:discipleship:record-create,Saisir un compte rendu de discipulat
+bbcms:discipleship:read,Consulter le discipulat
+bbcms:intercession:meeting-organize,Organiser une réunion d'intercession/retraite
+bbcms:intercession:chain-manage,Gérer la chaîne de prière (slots et intercesseurs)
+bbcms:intercession:member-manage,Ajouter/Retirer un intercesseur
+bbcms:intercession:read,Consulter l'intercession
+bbcms:financial:contribution-create,Créer une contribution spécifique
+bbcms:financial:contribution-record,Enregistrer un versement
+bbcms:financial:contribution-read,Consulter les contributions et le total
+bbcms:publication:daily-verse,Publier un Daily Verse
+bbcms:publication:announcement,Publier une info spéciale
+bbcms:publication:read,Consulter les publications
+bbcms:faithfulness:read,Consulter les fidèles/non-fidèles
+bbcms:faithfulness:compute,Déclencher le calcul de fidélité (cron)
+bbcms:dashboard:bbc,Consulter le tableau de bord d'un BBC
+bbcms:dashboard:national,Consulter le pilotage national CHF
+bbcms:setting:read,Lire les paramètres système
+bbcms:setting:update,Modifier les paramètres système

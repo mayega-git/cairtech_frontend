@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="10-prayer-chain" author="bbcms">
+        <createTable tableName="bbcms_prayer_chain">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_pc_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <column name="date_start" type="DATE"><constraints nullable="false"/></column>
+            <column name="date_end" type="DATE"/>
+            <!-- DRAFT / RUNNING / CLOSED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10-prayer-slot" author="bbcms">
+        <createTable tableName="bbcms_prayer_slot">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="prayer_chain_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ps_chain"
+                             references="bbcms_prayer_chain(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="intercessor_member_id" type="UUID">
+                <constraints foreignKeyName="fk_ps_intercessor"
+                             references="bbcms_member(id)"/>
+            </column>
+            <column name="dt_start" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="dt_end" type="TIMESTAMPTZ"><constraints nullable="false"/></column>
+            <column name="covered" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="note" type="TEXT"/>
+        </createTable>
+        <createIndex tableName="bbcms_prayer_slot" indexName="ix_ps_chain"><column name="prayer_chain_id"/></createIndex>
+    </changeSet>
+
+    <changeSet id="10-intercessor-assignment" author="bbcms">
+        <createTable tableName="bbcms_intercessor_assignment">
+            <column name="member_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ia_member"
+                             references="bbcms_member(id)"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_ia_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="date_start" type="DATE"><constraints nullable="false"/></column>
+            <column name="date_end" type="DATE"/>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_intercessor_assignment"
+                       columnNames="member_id, bible_club_id"
+                       constraintName="pk_ia"/>
+    </changeSet>
+
+</databaseChangeLog>

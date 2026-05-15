@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <include file="db/changelog/00-extensions.xml"/>
+    <include file="db/changelog/01-rbac-audit-settings.xml"/>
+    <include file="db/changelog/02-identity.xml"/>
+    <include file="db/changelog/03-organization.xml"/>
+    <include file="db/changelog/04-people.xml"/>
+    <include file="db/changelog/05-meeting.xml"/>
+    <include file="db/changelog/06-event.xml"/>
+    <include file="db/changelog/07-attendance.xml"/>
+    <include file="db/changelog/08-evangelism.xml"/>
+    <include file="db/changelog/09-discipleship.xml"/>
+    <include file="db/changelog/10-intercession.xml"/>
+    <include file="db/changelog/11-finance.xml"/>
+    <include file="db/changelog/12-publication.xml"/>
+    <include file="db/changelog/13-reset.xml"/>
+    <include file="db/changelog/14-domain-event-outbox.xml"/>
+    <include file="db/changelog/15-shedlock.xml"/>
+    <include file="db/seeds/16-seed-permissions.xml"/>
+    <include file="db/seeds/17-seed-roles.xml"/>
+    <include file="db/seeds/18-seed-settings.xml"/>
+    <include file="db/changelog/19-sync.xml"/>
+
+</databaseChangeLog>

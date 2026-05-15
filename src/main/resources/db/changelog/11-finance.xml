@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="11-financial-contribution" author="bbcms">
+        <createTable tableName="bbcms_financial_contribution">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_fc_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <column name="description" type="TEXT"/>
+            <column name="objective_amount" type="NUMERIC(15,2)"><constraints nullable="false"/></column>
+            <!-- V1: devise unique XAF (validé) -->
+            <column name="currency" type="VARCHAR(5)" defaultValue="XAF">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_open" type="DATE"><constraints nullable="false"/></column>
+            <column name="date_close" type="DATE"/>
+            <!-- OPEN / CLOSED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="OPEN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_contributed" type="NUMERIC(15,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="11-contribution-line" author="bbcms">
+        <createTable tableName="bbcms_contribution_line">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="contribution_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cl_contrib"
+                             references="bbcms_financial_contribution(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="contributor_member_id" type="UUID"/>
+            <column name="contributor_name" type="VARCHAR(200)"/>
+            <column name="amount" type="NUMERIC(15,2)"><constraints nullable="false"/></column>
+            <!-- CASH / MTN_MOMO / ORANGE_MONEY / BANK_TRANSFER -->
+            <column name="payment_channel" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="payment_reference" type="VARCHAR(50)"/>
+            <column name="payment_date" type="DATE"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            ALTER TABLE bbcms_contribution_line
+            ADD CONSTRAINT ck_cl_contributor
+            CHECK ((contributor_member_id IS NOT NULL) OR (contributor_name IS NOT NULL));
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

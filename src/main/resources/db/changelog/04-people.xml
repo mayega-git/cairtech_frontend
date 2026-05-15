@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!--
+        Polymorphisme single-table: bbcms_member.member_kind ∈
+        {STUDENT, PROFESSIONAL, MENTOR, NATIONAL_LEADER}.
+
+        PII supprimées (décision validée): first_names, gender, etc. NE sont
+        PAS dupliqués ici — toujours lus via user_account_id → bbcms_user_account.
+        Seules les données SPÉCIFIQUES MÉTIER restent.
+    -->
+
+    <changeSet id="04-member" author="bbcms">
+        <createTable tableName="bbcms_member">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_account_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_member_user"
+                             references="bbcms_user_account(id)"/>
+            </column>
+            <!-- STUDENT / PROFESSIONAL / MENTOR / NATIONAL_LEADER -->
+            <column name="member_kind" type="VARCHAR(20)"><constraints nullable="false"/></column>
+
+            <!-- spécifique STUDENT -->
+            <column name="bible_club_id" type="UUID">
+                <constraints foreignKeyName="fk_member_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="level_id" type="UUID">
+                <constraints foreignKeyName="fk_member_level"
+                             references="bbcms_level(id)"/>
+            </column>
+            <column name="participation_score" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="faithful_percentage" type="NUMERIC(5,2)" defaultValueNumeric="0"/>
+
+            <!-- spécifique PROFESSIONAL -->
+            <column name="profession" type="VARCHAR(150)"/>
+            <!-- SIMPLE_PROFESSIONAL / MENTOR -->
+            <column name="professional_position" type="VARCHAR(20)"/>
+
+            <!-- ACTIVE / INACTIVE / REMOVED / TRANSFERRED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_member" indexName="ix_member_user">
+            <column name="user_account_id"/>
+        </createIndex>
+        <createIndex tableName="bbcms_member" indexName="ix_member_bbc">
+            <column name="bible_club_id"/>
+        </createIndex>
+        <createIndex tableName="bbcms_member" indexName="ix_member_level">
+            <column name="level_id"/>
+        </createIndex>
+        <createIndex tableName="bbcms_member" indexName="ix_member_kind_status">
+            <column name="member_kind"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="04-member-department" author="bbcms">
+        <createTable tableName="bbcms_member_department">
+            <column name="member_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_md_member"
+                             references="bbcms_member(id)"
+                             deleteCascade="true"/>
+            </column>
+            <!-- INTERCESSOR / DISCIPLE_MAKER / CHARIS / DIVINE_SHAKERS / ACT_OF_CHRIST / ACADEMICS / MIGHTY_MEN_OF_VALOR / LADIES -->
+            <column name="department" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_member_department"
+                       columnNames="member_id, department"
+                       constraintName="pk_member_department"/>
+    </changeSet>
+
+    <changeSet id="04-mentor-assignment" author="bbcms">
+        <createTable tableName="bbcms_mentor_assignment">
+            <column name="member_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mentor_member"
+                             references="bbcms_member(id)"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mentor_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="date_start" type="DATE"><constraints nullable="false"/></column>
+            <column name="date_end" type="DATE"/>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_mentor_assignment"
+                       columnNames="member_id, bible_club_id"
+                       constraintName="pk_mentor_assignment"/>
+    </changeSet>
+
+    <changeSet id="04-visitor" author="bbcms">
+        <!--
+            Correction du Cahier: pas de FK polymorphe event_or_meeting_id.
+            On utilise deux colonnes nullables exclusives + check constraint.
+        -->
+        <createTable tableName="bbcms_visitor">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_names" type="VARCHAR(100)"><constraints nullable="false"/></column>
+            <column name="next_names" type="VARCHAR(100)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+            <column name="meeting_id" type="UUID"/>
+            <column name="event_id" type="UUID"/>
+            <column name="visit_date" type="DATE"/>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <sql><![CDATA[
+            ALTER TABLE bbcms_visitor
+            ADD CONSTRAINT ck_visitor_attached
+            CHECK ( (meeting_id IS NOT NULL) <> (event_id IS NOT NULL) OR (meeting_id IS NULL AND event_id IS NULL) );
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

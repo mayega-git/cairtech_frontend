@@ -1,0 +1,89 @@
+spring:
+  application:
+    name: bbcms
+  main:
+    banner-mode: console
+
+  # R2DBC pour les opérations applicatives (réactives)
+  r2dbc:
+    url: ${BBCMS_R2DBC_URL:r2dbc:postgresql://localhost:5432/bbcms}
+    username: ${BBCMS_DB_USER:bbcms}
+    password: ${BBCMS_DB_PASSWORD:bbcms}
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+
+  # JDBC séparé pour Liquibase et ShedLock (bloquant — c'est OK, hors hot-path)
+  datasource:
+    url: ${BBCMS_JDBC_URL:jdbc:postgresql://localhost:5432/bbcms}
+    username: ${BBCMS_DB_USER:bbcms}
+    password: ${BBCMS_DB_PASSWORD:bbcms}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      pool-name: bbcms-jdbc-utility
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+
+  mail:
+    host: ${BBCMS_SMTP_HOST:localhost}
+    port: ${BBCMS_SMTP_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+server:
+  port: ${BBCMS_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+bbcms:
+  security:
+    jwt:
+      secret: ${BBCMS_JWT_SECRET:change-me-in-production-this-must-be-at-least-256-bits-long-secret}
+      issuer: bbcms
+      access-token-ttl: PT15M
+      refresh-token-ttl: P30D
+  storage:
+    minio:
+      endpoint: ${BBCMS_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${BBCMS_MINIO_ACCESS_KEY:minioadmin}
+      secret-key: ${BBCMS_MINIO_SECRET_KEY:minioadmin}
+      bucket: ${BBCMS_MINIO_BUCKET:bbcms-media}
+  notification:
+    from-email: ${BBCMS_FROM_EMAIL:no-reply@chf.org}
+    push:
+      enabled: false
+    sms:
+      enabled: false
+  outbox:
+    publish-interval: PT5S
+    batch-size: 100
+  bootstrap:
+    super-admin:
+      enabled: ${BBCMS_SUPER_ADMIN_ENABLED:true}
+      email: ${BBCMS_SUPER_ADMIN_EMAIL:}
+      password: ${BBCMS_SUPER_ADMIN_PASSWORD:}
+      first-names: ${BBCMS_SUPER_ADMIN_FIRST_NAMES:Super}
+      next-names: ${BBCMS_SUPER_ADMIN_NEXT_NAMES:Admin}
+      # Si true au démarrage suivant, le mot de passe ci-dessus est réappliqué
+      # au compte existant (rotation hors-bande). Remettre à false aussitôt.
+      force-password-reset: ${BBCMS_SUPER_ADMIN_FORCE_PASSWORD_RESET:false}
+
+logging:
+  level:
+    root: INFO
+    com.chf.bbcms: DEBUG
+    org.springframework.r2dbc: INFO
+    org.springframework.web: INFO

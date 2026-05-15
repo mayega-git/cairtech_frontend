@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="03-bible-club" author="bbcms">
+        <createTable tableName="bbcms_bible_club">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(150)"><constraints nullable="false"/></column>
+            <column name="profile" type="TEXT"/>
+            <column name="school_name" type="VARCHAR(150)"/>
+            <column name="goal_nb_faithful" type="INT"/>
+            <column name="date_created" type="DATE"/>
+            <!-- ACTIVE / UNDER_RESET / ARCHIVED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="president_member_id" type="UUID"/>
+            <column name="vice_president_member_id" type="UUID"/>
+            <column name="secretary_member_id" type="UUID"/>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_bible_club" indexName="ix_bbc_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="03-level" author="bbcms">
+        <createTable tableName="bbcms_level">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_level_bbc"
+                             references="bbcms_bible_club(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"><constraints nullable="false"/></column>
+            <column name="profile" type="TEXT"/>
+            <!-- L1 .. L7 -->
+            <column name="type" type="VARCHAR(5)"><constraints nullable="false"/></column>
+            <column name="president_member_id" type="UUID"/>
+            <column name="vice_president_member_id" type="UUID"/>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="bbcms_level"
+                             columnNames="bible_club_id, type"
+                             constraintName="uk_level_bbc_type"/>
+        <createIndex tableName="bbcms_level" indexName="ix_level_bbc">
+            <column name="bible_club_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="03-leadership-assignment" author="bbcms">
+        <createTable tableName="bbcms_leadership_assignment">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="member_id" type="UUID"><constraints nullable="false"/></column>
+            <!-- BBC_PRESIDENT / BBC_VICE_PRESIDENT / BBC_SECRETARY / CLASS_PRESIDENT / ... -->
+            <column name="position" type="VARCHAR(40)"><constraints nullable="false"/></column>
+            <column name="scope_bible_club_id" type="UUID"/>
+            <column name="scope_level_id" type="UUID"/>
+            <column name="date_start" type="DATE"><constraints nullable="false"/></column>
+            <column name="date_end" type="DATE"/>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_leadership_assignment" indexName="ix_lass_member">
+            <column name="member_id"/>
+        </createIndex>
+        <createIndex tableName="bbcms_leadership_assignment" indexName="ix_lass_scope_bbc">
+            <column name="scope_bible_club_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

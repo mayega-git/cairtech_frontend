@@ -1,0 +1,17 @@
+.gradle/
+build/
+/out/
+/bin/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+HELP.md
+*.log
+
+# Local environment — credentials, DO NOT COMMIT
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,6 @@
+spring:
+  liquibase:
+    enabled: true
+bbcms:
+  outbox:
+    publish-interval: PT1M

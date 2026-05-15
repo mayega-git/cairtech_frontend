@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="12-daily-verse" author="bbcms">
+        <createTable tableName="bbcms_daily_verse_publication">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <column name="reference" type="VARCHAR(50)"><constraints nullable="false"/></column>
+            <column name="verse_text" type="TEXT"><constraints nullable="false"/></column>
+            <column name="reflection_text" type="TEXT"/>
+            <column name="image_file_id" type="UUID"/>
+            <column name="publish_date" type="DATE"><constraints nullable="false"/></column>
+            <!-- DRAFT / SCHEDULED / PUBLISHED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+            <!-- CHF / BBC / LEVEL / DEPARTMENT -->
+            <column name="audience" type="VARCHAR(20)" defaultValue="CHF">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12-special-announcement" author="bbcms">
+        <createTable tableName="bbcms_special_announcement">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <column name="content" type="TEXT"><constraints nullable="false"/></column>
+            <column name="image_file_id" type="UUID"/>
+            <!-- BIRTHDAY / CONGRESS / SUMMIT / OBITUARY / OTHER -->
+            <column name="type" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="publish_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="status" type="VARCHAR(15)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audience" type="VARCHAR(20)" defaultValue="CHF">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

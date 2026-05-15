@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="08-evangelism-program" author="bbcms">
+        <createTable tableName="bbcms_evangelism_program">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <!-- INTERNAL_BBC / JOINT -->
+            <column name="type" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="objective_believers" type="INT"><constraints nullable="false"/></column>
+            <column name="total_preached" type="INT" defaultValueNumeric="0"/>
+            <column name="total_saved" type="INT" defaultValueNumeric="0"/>
+            <column name="total_encouraged" type="INT" defaultValueNumeric="0"/>
+            <!-- DRAFT / ACTIVE / CLOSED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="DRAFT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="08-evangelism-program-dates" author="bbcms">
+        <createTable tableName="bbcms_evangelism_program_dates">
+            <column name="program_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgpd_program"
+                             references="bbcms_evangelism_program(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="program_date" type="DATE"><constraints nullable="false"/></column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_evangelism_program_dates"
+                       columnNames="program_id, program_date"
+                       constraintName="pk_evgpd"/>
+    </changeSet>
+
+    <changeSet id="08-evangelism-program-bbc" author="bbcms">
+        <createTable tableName="bbcms_evangelism_program_bbc">
+            <column name="program_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgpb_program"
+                             references="bbcms_evangelism_program(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgpb_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_evangelism_program_bbc"
+                       columnNames="program_id, bible_club_id"
+                       constraintName="pk_evgpb"/>
+    </changeSet>
+
+    <changeSet id="08-evangelism-record" author="bbcms">
+        <createTable tableName="bbcms_evangelism_record">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="program_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgr_program"
+                             references="bbcms_evangelism_program(id)"/>
+            </column>
+            <column name="record_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="nb_preached" type="INT" defaultValueNumeric="0"/>
+            <column name="nb_believed" type="INT" defaultValueNumeric="0"/>
+            <column name="nb_encouraged" type="INT" defaultValueNumeric="0"/>
+            <column name="nb_tracts_shared" type="INT" defaultValueNumeric="0"/>
+            <column name="saved_contacts" type="TEXT"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="08-evangelism-record-participants" author="bbcms">
+        <createTable tableName="bbcms_evangelism_record_participants">
+            <column name="record_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgrp_record"
+                             references="bbcms_evangelism_record(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="member_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_evgrp_member"
+                             references="bbcms_member(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_evangelism_record_participants"
+                       columnNames="record_id, member_id"
+                       constraintName="pk_evgrp"/>
+    </changeSet>
+
+</databaseChangeLog>

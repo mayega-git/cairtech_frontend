@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <!--
+        Rôles standards de BBCMS, dérivés du diagramme uc-bbcms-global.puml.
+        Le system-bot UUID 00000000-0000-0000-0000-000000000000 sert d'auteur initial.
+    -->
+    <changeSet id="17-system-roles" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role (id, name, description, created_by, updated_by) VALUES
+            ('11111111-0000-0000-0000-000000000001', 'SYSTEM_ADMIN',         'Super-administrateur technique (RBAC)', '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000002', 'NATIONAL_LEADER',      'Leader national CHF (BOT/Pdt/VP/SG)',   '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000003', 'BBC_LEADER',           'Président/VP/SG d''un Bible Club',      '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000004', 'CLASS_LEADER',         'Président/VP de classe',                 '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000005', 'MENTOR',               'Mentor (professionnel supervisant 1+ BBC)', '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000006', 'INTERCESSION_LEADER',  'Leader d''intercession',                 '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000007', 'EVANGELISM_LEADER',    'Leader évangélisation & discipulat',     '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000008', 'DISCIPLE_MAKER',       'Disciple maker',                          '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-000000000009', 'FINANCIAL_LEADER',     'Leader financier',                        '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-00000000000A', 'DAILY_VERSE_LEADER',   'Leader Daily Verse',                      '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-00000000000B', 'STUDENT',              'Membre simple (étudiant)',                '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-00000000000C', 'PROFESSIONAL',         'Professionnel',                           '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000'),
+            ('11111111-0000-0000-0000-00000000000D', 'VISITOR',              'Visiteur (non encore membre)',            '00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000');
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="17-role-permission-system-admin" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code)
+            SELECT '11111111-0000-0000-0000-000000000001', code FROM bbcms_permission;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="17-role-permission-national-leader" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code)
+            SELECT '11111111-0000-0000-0000-000000000002', code FROM bbcms_permission
+            WHERE code NOT IN ('bbcms:role:create','bbcms:role:update','bbcms:role:delete');
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="17-role-permission-bbc-leader" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+            ('11111111-0000-0000-0000-000000000003','bbcms:auth:login'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:auth:logout'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:auth:refresh'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:auth:change-password'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:user-account:read-self'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:user-account:update-self'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:bible-club:read'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:bible-club:read-partial'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:bible-club:set-goal'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:bible-club:assign-leader'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:level:create'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:level:update'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:level:delete'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:level:read'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:member:read'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:member:transfer'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:membership-request:approve'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:membership-request:reject'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:membership-request:read'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:meeting:plan'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:meeting:read'),
+            ('11111111-0000-0000-0000-000000000003','bbcms:dashboard:bbc');
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="17-role-permission-student" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+            ('11111111-0000-0000-0000-00000000000B','bbcms:auth:login'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:auth:logout'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:auth:refresh'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:auth:change-password'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:user-account:read-self'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:user-account:update-self'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:bible-club:read'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:bible-club:read-partial'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:meeting:read'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:event:enroll'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:event:read'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:member:leave'),
+            ('11111111-0000-0000-0000-00000000000B','bbcms:faithfulness:read');
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="17-role-permission-visitor" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+            ('11111111-0000-0000-0000-00000000000D','bbcms:auth:login'),
+            ('11111111-0000-0000-0000-00000000000D','bbcms:auth:reset-password'),
+            ('11111111-0000-0000-0000-00000000000D','bbcms:user-account:create'),
+            ('11111111-0000-0000-0000-00000000000D','bbcms:membership-request:submit'),
+            ('11111111-0000-0000-0000-00000000000D','bbcms:user-account:read-self'),
+            ('11111111-0000-0000-0000-00000000000D','bbcms:user-account:update-self');
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

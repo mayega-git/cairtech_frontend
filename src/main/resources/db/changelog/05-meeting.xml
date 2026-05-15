@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="05-meeting" author="bbcms">
+        <createTable tableName="bbcms_meeting">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints foreignKeyName="fk_meeting_bbc" references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="level_id" type="UUID">
+                <constraints foreignKeyName="fk_meeting_level" references="bbcms_level(id)"/>
+            </column>
+            <!-- INTERCESSOR / DISCIPLE_MAKER / CHARIS / ... pour DEPARTMENTAL_MEETING -->
+            <column name="department" type="VARCHAR(20)"/>
+            <column name="title" type="VARCHAR(200)"><constraints nullable="false"/></column>
+            <!-- CLASS_MEETING / JOINT_CLASS_MEETING / JOINT_BBC_MEETING / DEPARTMENTAL_MEETING /
+                 LEADERS_MEETING / GENERAL_MEETING / ACADEMIC_MEETING / SPIRITUAL_RETREAT /
+                 PRAYER_MEETING / WELCOME_PARTY / CONFERENCE / FEAST -->
+            <column name="type" type="VARCHAR(30)"><constraints nullable="false"/></column>
+            <column name="planned_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="planned_start_time" type="TIME"><constraints nullable="false"/></column>
+            <column name="planned_end_time" type="TIME"/>
+            <column name="date_occurred" type="DATE"/>
+            <column name="start_time" type="TIME"/>
+            <column name="end_time" type="TIME"/>
+            <column name="duration_minutes" type="INT"/>
+            <column name="teacher_member_id" type="UUID"/>
+            <column name="summary" type="TEXT"/>
+            <column name="nb_believers" type="INT" defaultValueNumeric="0"/>
+            <column name="max_pictures" type="INT" defaultValueNumeric="20"/>
+            <!-- PLANNED / ONGOING / ENDED / RECORDED / CANCELLED -->
+            <column name="status" type="VARCHAR(15)" defaultValue="PLANNED">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="UUID"><constraints nullable="false"/></column>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_meeting" indexName="ix_meeting_bbc"><column name="bible_club_id"/></createIndex>
+        <createIndex tableName="bbcms_meeting" indexName="ix_meeting_status"><column name="status"/></createIndex>
+        <createIndex tableName="bbcms_meeting" indexName="ix_meeting_planned_date"><column name="planned_date"/></createIndex>
+    </changeSet>
+
+    <changeSet id="05-meeting-levels" author="bbcms">
+        <createTable tableName="bbcms_meeting_levels_concerned">
+            <column name="meeting_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mlc_meeting"
+                             references="bbcms_meeting(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="level_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mlc_level"
+                             references="bbcms_level(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_meeting_levels_concerned"
+                       columnNames="meeting_id, level_id"
+                       constraintName="pk_meeting_levels"/>
+    </changeSet>
+
+    <changeSet id="05-meeting-bbcs" author="bbcms">
+        <createTable tableName="bbcms_meeting_bbc_concerned">
+            <column name="meeting_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mbc_meeting"
+                             references="bbcms_meeting(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mbc_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="bbcms_meeting_bbc_concerned"
+                       columnNames="meeting_id, bible_club_id"
+                       constraintName="pk_meeting_bbcs"/>
+    </changeSet>
+
+    <changeSet id="05-meeting-presence" author="bbcms">
+        <createTable tableName="bbcms_meeting_presence">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="meeting_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mp_meeting"
+                             references="bbcms_meeting(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="member_id" type="UUID"/>
+            <column name="visitor_id" type="UUID"/>
+            <column name="present_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <!-- MEMBER / VISITOR / TEACHER / SPEAKER -->
+            <column name="role" type="VARCHAR(15)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            ALTER TABLE bbcms_meeting_presence
+            ADD CONSTRAINT ck_mp_member_or_visitor
+            CHECK ((member_id IS NOT NULL) != (visitor_id IS NOT NULL));
+        </sql>
+        <createIndex tableName="bbcms_meeting_presence" indexName="ix_mp_meeting"><column name="meeting_id"/></createIndex>
+        <createIndex tableName="bbcms_meeting_presence" indexName="ix_mp_member"><column name="member_id"/></createIndex>
+    </changeSet>
+
+    <changeSet id="05-meeting-picture" author="bbcms">
+        <createTable tableName="bbcms_meeting_picture">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="meeting_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_mpic_meeting"
+                             references="bbcms_meeting(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="file_id" type="UUID"><constraints nullable="false"/></column>
+            <column name="caption" type="VARCHAR(255)"/>
+            <column name="taken_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

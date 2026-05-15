@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="13-bbc-reset-snapshot" author="bbcms">
+        <createTable tableName="bbcms_bbc_reset_snapshot">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bible_club_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_brs_bbc"
+                             references="bbcms_bible_club(id)"/>
+            </column>
+            <column name="academic_year" type="INT"><constraints nullable="false"/></column>
+            <column name="nb_members_before" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nb_faithful_before" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nb_meetings" type="INT" defaultValueNumeric="0"/>
+            <column name="percentage_reached" type="NUMERIC(5,2)"/>
+            <column name="archived_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="archive_file_id" type="UUID"/>
+            <column name="created_by" type="UUID"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="bbcms_bbc_reset_snapshot"
+                             columnNames="bible_club_id, academic_year"
+                             constraintName="uk_brs_bbc_year"/>
+    </changeSet>
+
+</databaseChangeLog>

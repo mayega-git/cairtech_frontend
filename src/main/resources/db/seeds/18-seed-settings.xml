@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="18-seed-settings" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_setting (key, value, description, updated_by) VALUES
+            ('faithfulness.threshold.percentage',          '50',     'Seuil (%) pour être considéré fidèle (RM-02)',                       '00000000-0000-0000-0000-000000000000'),
+            ('faithfulness.evangelism.weight',             '1',      'Poids d''un EvangelismRecord dans le score',                          '00000000-0000-0000-0000-000000000000'),
+            ('faithfulness.event.weight',                  '1',      'Poids d''une EventParticipation présente dans le score',              '00000000-0000-0000-0000-000000000000'),
+            ('faithfulness.meeting.weight',                '1',      'Poids d''une MeetingPresence dans le score',                          '00000000-0000-0000-0000-000000000000'),
+            ('faithfulness.cron',                          '0 0 2 * * *', 'Cron du calcul de fidélité (02h00 quotidien)',                   '00000000-0000-0000-0000-000000000000'),
+            ('inactivity.warning.threshold.days',          '30',     'Jours sans présence avant passage INACTIVE',                          '00000000-0000-0000-0000-000000000000'),
+            ('inactivity.removal.threshold.days',          '90',     'Jours sans présence avant désinscription automatique (RM-03)',        '00000000-0000-0000-0000-000000000000'),
+            ('meeting.max.pictures.default',               '20',     'Nombre maximum de photos par réunion (RM-04)',                        '00000000-0000-0000-0000-000000000000'),
+            ('meeting.reminder.hours.before',              '24',     'Délai (h) entre rappel et réunion planifiée',                         '00000000-0000-0000-0000-000000000000'),
+            ('rgpd.anonymization.delay.months',            '24',     'Délai après REMOVED avant anonymisation des PII',                     '00000000-0000-0000-0000-000000000000'),
+            ('finance.default.currency',                   'XAF',    'Devise unique de la V1',                                              '00000000-0000-0000-0000-000000000000');
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

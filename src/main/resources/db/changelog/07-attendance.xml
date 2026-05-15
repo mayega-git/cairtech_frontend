@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+    <changeSet id="07-attendance-score" author="bbcms">
+        <createTable tableName="bbcms_attendance_score">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="member_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_att_member"
+                             references="bbcms_member(id)"/>
+            </column>
+            <column name="bible_club_id" type="UUID"/>
+            <column name="level_id" type="UUID"/>
+            <column name="academic_year" type="INT"><constraints nullable="false"/></column>
+            <column name="score" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_eligible" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="faithful_percentage" type="NUMERIC(5,2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="faithful" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_computed_at" type="TIMESTAMPTZ"/>
+        </createTable>
+        <addUniqueConstraint tableName="bbcms_attendance_score"
+                             columnNames="member_id, academic_year"
+                             constraintName="uk_att_member_year"/>
+        <createIndex tableName="bbcms_attendance_score" indexName="ix_att_bbc_year">
+            <column name="bible_club_id"/>
+            <column name="academic_year"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="07-faithfulness-record" author="bbcms">
+        <createTable tableName="bbcms_faithfulness_record">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="attendance_score_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_fr_score"
+                             references="bbcms_attendance_score(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="member_id" type="UUID"><constraints nullable="false"/></column>
+            <column name="meeting_id" type="UUID"/>
+            <column name="event_id" type="UUID"/>
+            <column name="evangelism_record_id" type="UUID"/>
+            <!-- MEETING / EVENT / EVANGELISM -->
+            <column name="source" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="counted_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="weight" type="INT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="bbcms_faithfulness_record" indexName="ix_fr_score">
+            <column name="attendance_score_id"/>
+        </createIndex>
+        <addUniqueConstraint tableName="bbcms_faithfulness_record"
+                             columnNames="member_id, source, meeting_id, event_id, evangelism_record_id"
+                             constraintName="uk_fr_idempotency"/>
+    </changeSet>
+
+    <changeSet id="07-inactivity-watch" author="bbcms">
+        <createTable tableName="bbcms_inactivity_watch">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="member_id" type="UUID">
+                <constraints nullable="false" unique="true"
+                             foreignKeyName="fk_iw_member"
+                             references="bbcms_member(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="last_seen_at" type="TIMESTAMPTZ"/>
+            <column name="consecutive_absences" type="INT" defaultValueNumeric="0"/>
+            <column name="threshold_days" type="INT" defaultValueNumeric="90"/>
+            <column name="removed_at" type="TIMESTAMPTZ"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
