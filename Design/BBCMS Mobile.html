@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>BBCMS Mobile · Design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+  body { background: #f0eee9; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="screens-auth.jsx"></script>
+<script type="text/babel" src="screens-dashboards.jsx"></script>
+<script type="text/babel" src="screens-meetings.jsx"></script>
+<script type="text/babel" src="screens-spiritual.jsx"></script>
+<script type="text/babel" src="screens-community.jsx"></script>
+<script type="text/babel" src="screens-mission.jsx"></script>
+
+<script type="text/babel">
+const App = () => (
+  <DesignCanvas title="BBCMS Mobile" subtitle="App de gestion des Bible Clubs · Android · FR">
+    <DCSection id="auth" title="01 · Entrée dans l'app" subtitle="Login & onboarding adhésion">
+      <DCArtboard id="login" label="Login" width={380} height={800}><LoginScreen /></DCArtboard>
+      <DCArtboard id="onboarding" label="Onboarding · Adhésion" width={380} height={800}><OnboardingScreen /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="dashboards" title="02 · Tableaux de bord" subtitle="Membre · Leader BBC · National">
+      <DCArtboard id="dash-member" label="Dashboard membre" width={380} height={800}><MemberDashboard /></DCArtboard>
+      <DCArtboard id="dash-leader" label="Dashboard leader BBC" width={380} height={800}><LeaderDashboard /></DCArtboard>
+      <DCArtboard id="dash-national" label="Dashboard national" width={380} height={800}><NationalDashboard /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="meetings" title="03 · Réunions & présences" subtitle="Module Meeting · Attendance">
+      <DCArtboard id="meet-list" label="Liste des réunions" width={380} height={800}><MeetingsList /></DCArtboard>
+      <DCArtboard id="meet-attendance" label="Détail · Pointage" width={380} height={800}><MeetingAttendance /></DCArtboard>
+      <DCArtboard id="meet-create" label="Créer une réunion" width={380} height={800}><MeetingCreate /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="spiritual" title="04 · Vie spirituelle" subtitle="Verset, annonces, intercession">
+      <DCArtboard id="verse" label="Verset & annonces" width={380} height={800}><VerseScreen /></DCArtboard>
+      <DCArtboard id="prayer" label="Chaîne de prière" width={380} height={800}><PrayerChainScreen /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="community" title="05 · Communauté & finances" subtitle="Membres, donations">
+      <DCArtboard id="finance" label="Contribution" width={380} height={800}><FinanceScreen /></DCArtboard>
+      <DCArtboard id="members" label="Annuaire des membres" width={380} height={800}><MembersList /></DCArtboard>
+      <DCArtboard id="member-detail" label="Fiche membre" width={380} height={800}><MemberDetail /></DCArtboard>
+    </DCSection>
+
+    <DCSection id="mission" title="06 · Mission & formation" subtitle="Évangélisation, discipulat, profil">
+      <DCArtboard id="evangelism" label="Évangélisation" width={380} height={800}><EvangelismScreen /></DCArtboard>
+      <DCArtboard id="discipleship" label="Discipulat" width={380} height={800}><DiscipleshipScreen /></DCArtboard>
+      <DCArtboard id="profile" label="Profil & paramètres" width={380} height={800}><ProfileScreen /></DCArtboard>
+    </DCSection>
+  </DesignCanvas>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
