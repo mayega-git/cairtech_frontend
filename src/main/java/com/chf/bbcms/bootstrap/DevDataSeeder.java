@@ -299,15 +299,19 @@ public class DevDataSeeder {
     }
 
     private Mono<Void> assignRole(UUID userId, UUID roleId, UUID scopeBbcId) {
-        return db.sql("""
+        var spec = db.sql("""
                 INSERT INTO bbcms_user_role_assignment (user_account_id, role_id,
                     scope_bible_club_id, active, created_by, created_at, updated_by, updated_at, version)
                 VALUES (:uid, :rid, :scope, true, :sys, :now, :sys, :now, 0)
                 """)
                 .bind("uid", userId).bind("rid", roleId)
-                .bind("scope", scopeBbcId == null ? (UUID) null : scopeBbcId)
-                .bind("sys", SYSTEM).bind("now", Instant.now())
-                .then();
+                .bind("sys", SYSTEM).bind("now", Instant.now());
+        if (scopeBbcId == null) {
+            spec = spec.bindNull("scope", UUID.class);
+        } else {
+            spec = spec.bind("scope", scopeBbcId);
+        }
+        return spec.then();
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -348,19 +352,24 @@ public class DevDataSeeder {
     private Mono<Void> insertMeeting(UUID id, String title, String type, LocalDate date,
                                      String status, UUID bbcId, UUID levelId) {
         int nbBelievers = "RECORDED".equals(status) ? (1 + Math.abs(title.hashCode()) % 5) : 0;
-        return db.sql("""
+        boolean recorded = "RECORDED".equals(status);
+        var spec = db.sql("""
                 INSERT INTO bbcms_meeting (id, bible_club_id, level_id, title, type, planned_date,
                     planned_start_time, date_occurred, summary, nb_believers, max_pictures, status,
                     created_by, updated_by)
                 VALUES (:id, :bbc, :lvl, :title, :type, :date, '16:00:00',
                     :dateOccurred, :summary, :nb, 20, :status, :sys, :sys)
                 """)
-                .bind("id", id).bind("bbc", bbcId).bind("lvl", levelId == null ? (UUID) null : levelId)
+                .bind("id", id).bind("bbc", bbcId)
                 .bind("title", title).bind("type", type).bind("date", date)
-                .bind("dateOccurred", "RECORDED".equals(status) ? date : null)
-                .bind("summary", "RECORDED".equals(status) ? "Étude approfondie et temps de prière communautaire." : null)
-                .bind("nb", nbBelievers).bind("status", status).bind("sys", SYSTEM)
-                .then();
+                .bind("nb", nbBelievers).bind("status", status).bind("sys", SYSTEM);
+
+        spec = levelId == null ? spec.bindNull("lvl", UUID.class) : spec.bind("lvl", levelId);
+        spec = recorded ? spec.bind("dateOccurred", date) : spec.bindNull("dateOccurred", LocalDate.class);
+        spec = recorded
+                ? spec.bind("summary", "Étude approfondie et temps de prière communautaire.")
+                : spec.bindNull("summary", String.class);
+        return spec.then();
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -374,16 +383,16 @@ public class DevDataSeeder {
         return db.sql("""
                 INSERT INTO bbcms_attendance_score (id, member_id, bible_club_id, level_id,
                     academic_year, score, total_eligible, faithful_percentage, faithful,
-                    last_computed_at, created_by, updated_by)
+                    last_computed_at)
                 SELECT gen_random_uuid(), m.id, m.bible_club_id, m.level_id,
                        :year, m.participation_score, 26,
                        m.faithful_percentage,
                        (m.faithful_percentage >= 50)::boolean,
-                       :now, :sys, :sys
+                       :now
                 FROM bbcms_member m
                 WHERE m.member_kind = 'STUDENT' AND m.status = 'ACTIVE'
                 """)
-                .bind("year", year).bind("now", Instant.now()).bind("sys", SYSTEM)
+                .bind("year", year).bind("now", Instant.now())
                 .then();
     }
 
@@ -434,14 +443,13 @@ public class DevDataSeeder {
         UUID chainId = UUID.randomUUID();
         return db.sql("""
                 INSERT INTO bbcms_prayer_chain (id, bible_club_id, title, date_start, date_end,
-                    status, created_by, updated_by)
-                VALUES (:id, :bbc, :title, :start, :end, 'RUNNING', :sys, :sys)
+                    status)
+                VALUES (:id, :bbc, :title, :start, :end, 'RUNNING')
                 """)
                 .bind("id", chainId).bind("bbc", BBC_UNIKIN)
                 .bind("title", "Réveil de Pentecôte 2026")
                 .bind("start", LocalDate.now())
                 .bind("end", LocalDate.now().plusDays(1))
-                .bind("sys", SYSTEM)
                 .then()
                 .then(seedPrayerSlots(chainId));
     }
@@ -460,12 +468,10 @@ public class DevDataSeeder {
 
     private Mono<Void> insertPrayerSlot(UUID chainId, Instant start, Instant end, boolean covered) {
         return db.sql("""
-                INSERT INTO bbcms_prayer_slot (id, prayer_chain_id, dt_start, dt_end, covered,
-                    created_by, updated_by)
-                VALUES (gen_random_uuid(), :cid, :s, :e, :c, :sys, :sys)
+                INSERT INTO bbcms_prayer_slot (id, prayer_chain_id, dt_start, dt_end, covered)
+                VALUES (gen_random_uuid(), :cid, :s, :e, :c)
                 """)
                 .bind("cid", chainId).bind("s", start).bind("e", end).bind("c", covered)
-                .bind("sys", SYSTEM)
                 .then();
     }
 
@@ -507,15 +513,13 @@ public class DevDataSeeder {
         UUID contribId = UUID.randomUUID();
         return db.sql("""
                 INSERT INTO bbcms_financial_contribution (id, bible_club_id, title, description,
-                    objective_amount, currency, total_contributed, status, date_open,
-                    created_by, updated_by)
-                VALUES (:id, :bbc, :title, :desc, 480.00, 'USD', 284.00, 'OPEN', :date, :sys, :sys)
+                    objective_amount, currency, total_contributed, status, date_open)
+                VALUES (:id, :bbc, :title, :desc, 480.00, 'USD', 284.00, 'OPEN', :date)
                 """)
                 .bind("id", contribId).bind("bbc", BBC_UNIKIN)
                 .bind("title", "Édifice Gospel — Construction salle")
                 .bind("desc", "Objectif annuel : équiper la grande salle.")
                 .bind("date", LocalDate.now().minusMonths(2))
-                .bind("sys", SYSTEM)
                 .then();
     }
 

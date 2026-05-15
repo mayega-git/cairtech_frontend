@@ -18,5 +18,6 @@ public record RegisterUserCommand(
         UserType requestedType,
         UUID bibleClubId,
         UUID levelId,
-        String profession
+        String profession,
+        UUID pictureFileId
 ) {}

@@ -49,9 +49,13 @@ public class SecurityConfiguration {
                         .pathMatchers(
                                 "/api/v1/bbcms/auth/login",
                                 "/api/v1/bbcms/auth/refresh",
+                                "/api/v1/bbcms/auth/logout",
                                 "/api/v1/bbcms/auth/reset-password",
+                                "/api/v1/bbcms/auth/reset-password/confirm",
                                 "/api/v1/bbcms/users/activate",
                                 "/api/v1/bbcms/users",
+                                "/api/v1/bbcms/files",
+                                "/api/v1/bbcms/files/**",
                                 "/api/v1/bbcms/public/**",
                                 "/actuator/health",
                                 "/actuator/info",

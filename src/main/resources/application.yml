@@ -70,6 +70,8 @@ bbcms:
   outbox:
     publish-interval: PT5S
     batch-size: 100
+  frontend:
+    base-url: ${BBCMS_FRONTEND_BASE_URL:http://localhost:3000}
   bootstrap:
     super-admin:
       enabled: ${BBCMS_SUPER_ADMIN_ENABLED:true}

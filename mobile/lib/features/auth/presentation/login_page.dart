@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/di/service_locator.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
@@ -15,8 +17,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _email = TextEditingController(text: 'admin@chf.org');
-  final _password = TextEditingController(text: 'ChangeMeNow_2025!');
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   final _form = GlobalKey<FormState>();
   bool _obscure = true;
 
@@ -165,12 +167,15 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Text('Mot de passe oublié ?',
                     style: AppTypography.mono(size: 11, color: AppColors.muted)),
-                Text(
-                  'Réinitialiser',
-                  style: AppTypography.mono(
-                    size: 11,
-                    color: AppColors.ink,
-                    weight: FontWeight.w600,
+                InkWell(
+                  onTap: () => context.go(AppRoutes.forgotPassword),
+                  child: Text(
+                    'Réinitialiser',
+                    style: AppTypography.mono(
+                      size: 11,
+                      color: AppColors.ink,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -216,20 +221,23 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 14),
             Center(
-              child: RichText(
-                text: TextSpan(
-                  style: AppTypography.sans(size: 13, color: AppColors.muted),
-                  children: [
-                    const TextSpan(text: 'Pas encore membre ? '),
-                    TextSpan(
-                      text: "Demander l'adhésion",
-                      style: AppTypography.sans(
-                        size: 13,
-                        color: AppColors.ink,
-                        weight: FontWeight.w500,
+              child: InkWell(
+                onTap: () => context.go(AppRoutes.onboarding),
+                child: RichText(
+                  text: TextSpan(
+                    style: AppTypography.sans(size: 13, color: AppColors.muted),
+                    children: [
+                      const TextSpan(text: 'Pas encore membre ? '),
+                      TextSpan(
+                        text: "Demander l'adhésion",
+                        style: AppTypography.sans(
+                          size: 13,
+                          color: AppColors.ink,
+                          weight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -42,7 +42,7 @@ public class UserAccountController {
                 req.email(), req.password(), req.phone(),
                 req.firstNames(), req.nextNames(), req.dateOfBirth(), req.gender(),
                 req.locale(), req.requestedType(), req.bibleClubId(), req.levelId(),
-                req.profession());
+                req.profession(), req.pictureFileId());
         return useCase.register(command).map(UserAccountResponse::from);
     }
 
@@ -70,7 +70,8 @@ public class UserAccountController {
             @NotNull UserType requestedType,
             UUID bibleClubId,
             UUID levelId,
-            String profession
+            String profession,
+            UUID pictureFileId
     ) {}
 
     public record UserAccountResponse(UUID id, String email, String status, String userType,

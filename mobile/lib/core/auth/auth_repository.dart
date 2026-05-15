@@ -60,6 +60,7 @@ class AuthRepository {
     String? bibleClubId,
     String? levelId,
     String? profession,
+    String? pictureFileId,
     String? locale = 'fr',
   }) async {
     final res = await _dio.post('/users', data: {
@@ -74,8 +75,37 @@ class AuthRepository {
       if (bibleClubId != null) 'bibleClubId': bibleClubId,
       if (levelId != null) 'levelId': levelId,
       if (profession != null) 'profession': profession,
+      if (pictureFileId != null) 'pictureFileId': pictureFileId,
       'locale': locale,
     });
     return res.data as Map<String, dynamic>;
+  }
+
+  Future<void> activate(String token) async {
+    await _dio.post('/users/activate', queryParameters: {'token': token});
+  }
+
+  Future<void> requestPasswordReset(String email) async {
+    await _dio.post('/auth/reset-password', data: {'email': email});
+  }
+
+  Future<void> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+  }) async {
+    await _dio.post('/auth/reset-password/confirm', data: {
+      'token': token,
+      'newPassword': newPassword,
+    });
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _dio.post('/auth/change-password', data: {
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
+    });
   }
 }

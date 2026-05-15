@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/di/service_locator.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
@@ -269,6 +271,18 @@ class WidgetGalleryPage extends StatelessWidget {
                                   style: AppTypography.mono(size: 11, color: Colors.white.withOpacity(0.7))),
                               Text('${u.roles.length} rôles',
                                   style: AppTypography.mono(size: 11, color: Colors.white.withOpacity(0.7))),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                                  ),
+                                  onPressed: () => context.push(AppRoutes.changePassword),
+                                  child: const Text('Changer mon mot de passe'),
+                                ),
+                              ),
                             ],
                           ),
                         );

@@ -23,7 +23,7 @@ au backend Spring Boot/WebFlux décrit à la racine du dépôt.
 lib/
 ├── main.dart, app.dart
 ├── core/
-│   ├── api/           # Dio client + ApiConfig
+│   ├── api/           # Dio client, ApiConfig, FileUploader (multipart)
 │   ├── auth/          # AuthBloc, AuthRepository, TokenStorage, CurrentUser (JWT)
 │   ├── theme/         # AppColors, AppTypography, AppTheme, AppRadius/Spacing
 │   ├── widgets/       # Tag, Avatar, RoundIconButton, BarProgress, Donut, Sparkline,
@@ -32,8 +32,11 @@ lib/
 │   ├── di/            # service_locator.dart (get_it)
 │   └── errors/        # ApiException
 └── features/
-    ├── auth/          # LoginPage (Phase 1 — partiel)
-    └── shell/         # WidgetGalleryPage (page de démo Phase 0)
+    ├── auth/          # LoginPage, ForgotPasswordPage, ResetPasswordPage,
+    │                  # ActivationPage, ChangePasswordPage
+    ├── onboarding/    # OnboardingPage (wizard 4 étapes), OnboardingCubit,
+    │                  # PublicRegistryRepository
+    └── shell/         # WidgetGalleryPage (page de démo)
 ```
 
 ## Lancement
@@ -97,7 +100,7 @@ flutter test
 | # | Phase                                  | Statut |
 |---|----------------------------------------|--------|
 | 0 | Foundation (theme, atomes, auth, DI)   | ✅ DONE |
-| 1 | Auth + Onboarding                      | 🔵 partiel — LoginPage OK |
+| 1 | Auth + Onboarding (4 étapes + photo, forgot/reset/change/activation) | ✅ DONE |
 | 2 | Shell de navigation (TabBar adaptatif) | ⏳     |
 | 3 | Dashboards (membre / leader / national)| ⏳     |
 | 4 | Réunions                               | ⏳     |
