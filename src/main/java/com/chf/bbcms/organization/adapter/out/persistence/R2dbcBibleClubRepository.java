@@ -50,6 +50,7 @@ public class R2dbcBibleClubRepository implements BibleClubRepository {
                 r.getGoalNbFaithful(), r.getDateCreated(),
                 BibleClubStatus.valueOf(r.getStatus()),
                 r.getPresidentMemberId(), r.getVicePresidentMemberId(), r.getSecretaryMemberId(),
+                r.getImageFileId(),
                 r.getCreatedAt(), r.getUpdatedAt(), r.getVersion());
     }
 
@@ -65,6 +66,7 @@ public class R2dbcBibleClubRepository implements BibleClubRepository {
         r.setPresidentMemberId(b.getPresidentMemberId());
         r.setVicePresidentMemberId(b.getVicePresidentMemberId());
         r.setSecretaryMemberId(b.getSecretaryMemberId());
+        r.setImageFileId(b.getImageFileId());
         Instant now = Instant.now();
         if (b.getId() == null) {
             r.setCreatedBy(SYSTEM);

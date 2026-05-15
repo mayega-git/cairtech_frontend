@@ -29,13 +29,19 @@ public class EventController {
     @PreAuthorize("hasAuthority('bbcms:event:plan')")
     public Mono<EventResponse> plan(@Valid @RequestBody PlanRequest req) {
         return useCase.plan(req.title(), req.type(), req.plannedStart(), req.plannedEnd(),
-                req.location(), req.maxPictures()).map(EventResponse::from);
+                req.location(), req.maxPictures(), req.imageFileId()).map(EventResponse::from);
     }
 
     @PostMapping("/{id}/open-registration")
     @PreAuthorize("hasAuthority('bbcms:event:plan')")
     public Mono<EventResponse> openRegistration(@PathVariable UUID id) {
         return useCase.openRegistration(id).map(EventResponse::from);
+    }
+
+    @PutMapping("/{id}/image")
+    @PreAuthorize("hasAuthority('bbcms:event:plan')")
+    public Mono<EventResponse> setImage(@PathVariable UUID id, @RequestBody ImageRequest req) {
+        return useCase.setImage(id, req.imageFileId()).map(EventResponse::from);
     }
 
     @PostMapping("/{id}/start")
@@ -84,18 +90,20 @@ public class EventController {
 
     public record PlanRequest(@NotBlank String title, @NotNull EventType type,
                               @NotNull Instant plannedStart, Instant plannedEnd,
-                              String location, Integer maxPictures) {}
+                              String location, Integer maxPictures, UUID imageFileId) {}
     public record StartRequest(Instant when) {}
     public record EnrollRequest(@NotNull UUID memberId) {}
     public record PresenceRequest(@NotNull UUID memberId, Instant when) {}
+    public record ImageRequest(UUID imageFileId) {}
 
     public record EventResponse(UUID id, String title, String type, String status,
                                 Instant plannedStart, Instant plannedEnd, Instant startedAt,
-                                Instant endedAt, Integer durationMinutes, String location, int maxPictures) {
+                                Instant endedAt, Integer durationMinutes, String location, int maxPictures,
+                                UUID imageFileId) {
         static EventResponse from(Event e) {
             return new EventResponse(e.getId(), e.getTitle(), e.getType().name(), e.getStatus().name(),
                     e.getPlannedStartDt(), e.getPlannedEndDt(), e.getStartedAt(), e.getEndedAt(),
-                    e.getDurationMinutes(), e.getLocation(), e.getMaxPictures());
+                    e.getDurationMinutes(), e.getLocation(), e.getMaxPictures(), e.getImageFileId());
         }
     }
 

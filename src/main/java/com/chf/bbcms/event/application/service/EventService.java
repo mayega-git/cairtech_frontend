@@ -29,14 +29,19 @@ public class EventService implements ManageEventUseCase {
 
     @Override
     public Mono<Event> plan(String title, EventType type, Instant plannedStart, Instant plannedEnd,
-                            String location, Integer maxPictures) {
+                            String location, Integer maxPictures, UUID imageFileId) {
         return repository.save(Event.plan(title, type, plannedStart, plannedEnd, location,
-                maxPictures == null ? 50 : maxPictures));
+                maxPictures == null ? 50 : maxPictures, imageFileId));
     }
 
     @Override
     public Mono<Event> openRegistration(UUID eventId) {
         return load(eventId).flatMap(e -> { e.openRegistration(); return repository.save(e); });
+    }
+
+    @Override
+    public Mono<Event> setImage(UUID eventId, UUID imageFileId) {
+        return load(eventId).flatMap(e -> { e.setImageFileId(imageFileId); return repository.save(e); });
     }
 
     @Override

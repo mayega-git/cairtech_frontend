@@ -21,6 +21,7 @@ public class EventRow {
     private String location;
     @Column("max_pictures")     private int maxPictures;
     private String status;
+    @Column("image_file_id")    private UUID imageFileId;
     @Column("created_by") private UUID createdBy;
     @Column("created_at") private Instant createdAt;
     @Column("updated_by") private UUID updatedBy;
@@ -38,6 +39,7 @@ public class EventRow {
     public String getLocation() { return location; } public void setLocation(String l) { this.location = l; }
     public int getMaxPictures() { return maxPictures; } public void setMaxPictures(int m) { this.maxPictures = m; }
     public String getStatus() { return status; }     public void setStatus(String s) { this.status = s; }
+    public UUID getImageFileId() { return imageFileId; } public void setImageFileId(UUID i) { this.imageFileId = i; }
     public UUID getCreatedBy() { return createdBy; } public void setCreatedBy(UUID c) { this.createdBy = c; }
     public Instant getCreatedAt() { return createdAt; } public void setCreatedAt(Instant c) { this.createdAt = c; }
     public UUID getUpdatedBy() { return updatedBy; } public void setUpdatedBy(UUID u) { this.updatedBy = u; }

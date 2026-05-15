@@ -23,7 +23,13 @@ public class BibleClubService implements ManageBibleClubUseCase {
     public Mono<BibleClub> create(CreateBibleClubCommand cmd) {
         BibleClub b = BibleClub.create(cmd.name(), cmd.profile(), cmd.schoolName(),
                 cmd.goalNbFaithful(), cmd.dateCreated());
+        if (cmd.imageFileId() != null) b.setImageFileId(cmd.imageFileId());
         return repository.save(b);
+    }
+
+    @Override
+    public Mono<BibleClub> setImage(UUID id, UUID imageFileId) {
+        return findById(id).flatMap(b -> { b.setImageFileId(imageFileId); return repository.save(b); });
     }
 
     @Override

@@ -21,6 +21,7 @@ public class BibleClubRow {
     @Column("president_member_id")        private UUID presidentMemberId;
     @Column("vice_president_member_id")   private UUID vicePresidentMemberId;
     @Column("secretary_member_id")        private UUID secretaryMemberId;
+    @Column("image_file_id")              private UUID imageFileId;
     @Column("created_by") private UUID createdBy;
     @Column("created_at") private Instant createdAt;
     @Column("updated_by") private UUID updatedBy;
@@ -37,6 +38,7 @@ public class BibleClubRow {
     public UUID getPresidentMemberId() { return presidentMemberId; }     public void setPresidentMemberId(UUID i) { this.presidentMemberId = i; }
     public UUID getVicePresidentMemberId() { return vicePresidentMemberId; } public void setVicePresidentMemberId(UUID i) { this.vicePresidentMemberId = i; }
     public UUID getSecretaryMemberId() { return secretaryMemberId; }     public void setSecretaryMemberId(UUID i) { this.secretaryMemberId = i; }
+    public UUID getImageFileId() { return imageFileId; }                 public void setImageFileId(UUID i) { this.imageFileId = i; }
     public UUID getCreatedBy() { return createdBy; }   public void setCreatedBy(UUID c) { this.createdBy = c; }
     public Instant getCreatedAt() { return createdAt; } public void setCreatedAt(Instant c) { this.createdAt = c; }
     public UUID getUpdatedBy() { return updatedBy; }   public void setUpdatedBy(UUID u) { this.updatedBy = u; }

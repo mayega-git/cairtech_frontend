@@ -31,8 +31,14 @@ public class BibleClubController {
     public Mono<BibleClubResponse> create(@Valid @RequestBody CreateRequest req) {
         return useCase.create(new CreateBibleClubCommand(
                         req.name(), req.profile(), req.schoolName(),
-                        req.goalNbFaithful(), req.dateCreated()))
+                        req.goalNbFaithful(), req.dateCreated(), req.imageFileId()))
                 .map(BibleClubResponse::from);
+    }
+
+    @PutMapping("/{id}/image")
+    @PreAuthorize("hasAuthority('bbcms:bible-club:update')")
+    public Mono<BibleClubResponse> setImage(@PathVariable UUID id, @RequestBody ImageRequest req) {
+        return useCase.setImage(id, req.imageFileId()).map(BibleClubResponse::from);
     }
 
     @GetMapping
@@ -70,19 +76,23 @@ public class BibleClubController {
 
     public record CreateRequest(
             @NotBlank String name, String profile, String schoolName,
-            @Min(0) Integer goalNbFaithful, LocalDate dateCreated) {}
+            @Min(0) Integer goalNbFaithful, LocalDate dateCreated, UUID imageFileId) {}
 
     public record SetGoalRequest(@Min(0) int goalNbFaithful) {}
 
     public record AssignTriumvirateRequest(UUID presidentId, UUID vicePresidentId, UUID secretaryId) {}
 
+    public record ImageRequest(UUID imageFileId) {}
+
     public record BibleClubResponse(UUID id, String name, String profile, String schoolName,
                                     Integer goalNbFaithful, LocalDate dateCreated, String status,
-                                    UUID presidentMemberId, UUID vicePresidentMemberId, UUID secretaryMemberId) {
+                                    UUID presidentMemberId, UUID vicePresidentMemberId, UUID secretaryMemberId,
+                                    UUID imageFileId) {
         static BibleClubResponse from(BibleClub b) {
             return new BibleClubResponse(b.getId(), b.getName(), b.getProfile(), b.getSchoolName(),
                     b.getGoalNbFaithful(), b.getDateCreated(), b.getStatus().name(),
-                    b.getPresidentMemberId(), b.getVicePresidentMemberId(), b.getSecretaryMemberId());
+                    b.getPresidentMemberId(), b.getVicePresidentMemberId(), b.getSecretaryMemberId(),
+                    b.getImageFileId());
         }
     }
 }

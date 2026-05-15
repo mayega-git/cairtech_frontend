@@ -120,7 +120,9 @@ public class R2dbcEventRepository implements EventRepository {
         return Event.rehydrate(r.getId(), r.getTitle(), EventType.valueOf(r.getType()),
                 r.getPlannedStartDt(), r.getPlannedEndDt(), r.getStartedAt(), r.getEndedAt(),
                 r.getDurationMinutes(), r.getLocation(), r.getMaxPictures(),
-                EventStatus.valueOf(r.getStatus()), r.getCreatedAt(), r.getUpdatedAt(), r.getVersion());
+                EventStatus.valueOf(r.getStatus()),
+                r.getImageFileId(),
+                r.getCreatedAt(), r.getUpdatedAt(), r.getVersion());
     }
 
     private EventRow toRow(Event e) {
@@ -136,6 +138,7 @@ public class R2dbcEventRepository implements EventRepository {
         r.setLocation(e.getLocation());
         r.setMaxPictures(e.getMaxPictures());
         r.setStatus(e.getStatus().name());
+        r.setImageFileId(e.getImageFileId());
         Instant now = Instant.now();
         if (e.getId() == null) { r.setCreatedBy(SYSTEM); r.setCreatedAt(now); }
         else {

@@ -19,11 +19,13 @@ public class Event extends BaseEntity {
     private String location;
     private int maxPictures;
     private EventStatus status;
+    private UUID imageFileId;
 
     protected Event() {}
 
     public static Event plan(String title, EventType type, Instant plannedStartDt,
-                             Instant plannedEndDt, String location, int maxPictures) {
+                             Instant plannedEndDt, String location, int maxPictures,
+                             UUID imageFileId) {
         if (title == null || title.isBlank()) throw new IllegalArgumentException("title required");
         if (type == null) throw new IllegalArgumentException("type required");
         if (plannedStartDt == null) throw new IllegalArgumentException("plannedStartDt required");
@@ -35,6 +37,7 @@ public class Event extends BaseEntity {
         e.location = location;
         e.maxPictures = maxPictures > 0 ? maxPictures : 50;
         e.status = EventStatus.PLANNED;
+        e.imageFileId = imageFileId;
         return e;
     }
 
@@ -42,6 +45,7 @@ public class Event extends BaseEntity {
                                   Instant plannedStartDt, Instant plannedEndDt,
                                   Instant startedAt, Instant endedAt, Integer durationMinutes,
                                   String location, int maxPictures, EventStatus status,
+                                  UUID imageFileId,
                                   Instant createdAt, Instant updatedAt, Long version) {
         Event e = new Event();
         e.id = id;
@@ -55,11 +59,14 @@ public class Event extends BaseEntity {
         e.location = location;
         e.maxPictures = maxPictures;
         e.status = status;
+        e.imageFileId = imageFileId;
         e.createdAt = createdAt;
         e.updatedAt = updatedAt;
         e.version = version;
         return e;
     }
+
+    public void setImageFileId(UUID imageFileId) { this.imageFileId = imageFileId; }
 
     public void openRegistration() {
         if (status != EventStatus.PLANNED)
@@ -105,4 +112,5 @@ public class Event extends BaseEntity {
     public String getLocation() { return location; }
     public int getMaxPictures() { return maxPictures; }
     public EventStatus getStatus() { return status; }
+    public UUID getImageFileId() { return imageFileId; }
 }

@@ -11,8 +11,9 @@ import java.util.UUID;
 
 public interface ManageEventUseCase {
     Mono<Event> plan(String title, EventType type, Instant plannedStart, Instant plannedEnd,
-                     String location, Integer maxPictures);
+                     String location, Integer maxPictures, UUID imageFileId);
     Mono<Event> openRegistration(UUID eventId);
+    Mono<Event> setImage(UUID eventId, UUID imageFileId);
     Mono<Event> start(UUID eventId, Instant when);
     Mono<Event> end(UUID eventId, Instant when);
     Mono<Event> cancel(UUID eventId);

@@ -18,6 +18,7 @@ public class BibleClub extends BaseEntity {
     private UUID presidentMemberId;
     private UUID vicePresidentMemberId;
     private UUID secretaryMemberId;
+    private UUID imageFileId;
 
     protected BibleClub() {}
 
@@ -39,6 +40,7 @@ public class BibleClub extends BaseEntity {
     public static BibleClub rehydrate(UUID id, String name, String profile, String schoolName,
                                       Integer goalNbFaithful, LocalDate dateCreated, BibleClubStatus status,
                                       UUID presidentMemberId, UUID vicePresidentMemberId, UUID secretaryMemberId,
+                                      UUID imageFileId,
                                       Instant createdAt, Instant updatedAt, Long version) {
         BibleClub b = new BibleClub();
         b.id = id;
@@ -51,6 +53,7 @@ public class BibleClub extends BaseEntity {
         b.presidentMemberId = presidentMemberId;
         b.vicePresidentMemberId = vicePresidentMemberId;
         b.secretaryMemberId = secretaryMemberId;
+        b.imageFileId = imageFileId;
         b.createdAt = createdAt;
         b.updatedAt = updatedAt;
         b.version = version;
@@ -73,6 +76,7 @@ public class BibleClub extends BaseEntity {
     public void assignPresident(UUID memberId)      { ensureMutable(); this.presidentMemberId = memberId; }
     public void assignVicePresident(UUID memberId)  { ensureMutable(); this.vicePresidentMemberId = memberId; }
     public void assignSecretary(UUID memberId)      { ensureMutable(); this.secretaryMemberId = memberId; }
+    public void setImageFileId(UUID imageFileId)    { ensureMutable(); this.imageFileId = imageFileId; }
 
     public void startReset() {
         if (status != BibleClubStatus.ACTIVE)
@@ -108,4 +112,5 @@ public class BibleClub extends BaseEntity {
     public UUID getPresidentMemberId() { return presidentMemberId; }
     public UUID getVicePresidentMemberId() { return vicePresidentMemberId; }
     public UUID getSecretaryMemberId() { return secretaryMemberId; }
+    public UUID getImageFileId() { return imageFileId; }
 }

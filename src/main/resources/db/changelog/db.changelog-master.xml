@@ -25,5 +25,6 @@
     <include file="db/seeds/17-seed-roles.xml"/>
     <include file="db/seeds/18-seed-settings.xml"/>
     <include file="db/changelog/19-sync.xml"/>
+    <include file="db/changelog/20-images-and-seed.xml"/>
 
 </databaseChangeLog>

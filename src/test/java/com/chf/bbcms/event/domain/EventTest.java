@@ -14,7 +14,7 @@ class EventTest {
         return Event.plan("Congress 2025", EventType.NATIONAL_CONGRESS,
                 Instant.now().plus(Duration.ofDays(30)),
                 Instant.now().plus(Duration.ofDays(33)),
-                "Yaoundé", 100);
+                "Yaoundé", 100, null);
     }
 
     @Test

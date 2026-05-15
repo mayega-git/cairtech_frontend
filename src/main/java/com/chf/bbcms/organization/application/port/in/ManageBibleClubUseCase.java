@@ -12,13 +12,15 @@ public interface ManageBibleClubUseCase {
     Mono<BibleClub> create(CreateBibleClubCommand cmd);
     Mono<BibleClub> update(UUID id, UpdateBibleClubCommand cmd);
     Mono<BibleClub> setGoal(UUID id, int goalNbFaithful);
+    Mono<BibleClub> setImage(UUID id, UUID imageFileId);
     Mono<BibleClub> assignTriumvirate(UUID id, UUID presidentId, UUID vicePresidentId, UUID secretaryId);
     Mono<BibleClub> findById(UUID id);
     Flux<BibleClub> listAll();
     Mono<Void> deleteById(UUID id);
 
     record CreateBibleClubCommand(String name, String profile, String schoolName,
-                                  Integer goalNbFaithful, LocalDate dateCreated) {}
+                                  Integer goalNbFaithful, LocalDate dateCreated,
+                                  UUID imageFileId) {}
 
     record UpdateBibleClubCommand(String name, String profile, String schoolName) {}
 }
