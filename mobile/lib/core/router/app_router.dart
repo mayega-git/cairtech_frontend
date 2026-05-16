@@ -15,9 +15,12 @@ import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
 import '../../features/members/presentation/member_detail_page.dart';
 import '../../features/members/presentation/members_tab.dart';
+import '../../features/intercession/presentation/prayer_chain_detail_page.dart';
+import '../../features/intercession/presentation/prayer_chains_page.dart';
 import '../../features/membership_requests/presentation/membership_requests_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/profile/presentation/profile_tab.dart';
+import '../../features/publications/presentation/publication_create_page.dart';
 import '../../features/publications/presentation/spiritual_tab.dart';
 import '../../features/shell/presentation/app_shell.dart';
 import '../../features/shell/presentation/feature_stub_page.dart';
@@ -42,6 +45,9 @@ class AppRoutes {
   static const meetingCreate = '/meetings/new';
   static const members = '/members';
   static const membersBase = '/members';
+  static const prayerChains = '/intercession/chains';
+  static const prayerChainsBase = '/intercession/chains';
+  static const publicationCreate = '/publications/new';
   static const spiritual = '/spiritual';
   static const profile = '/profile';
 
@@ -237,15 +243,20 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.publications,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'PUBLICATIONS',
-          title: 'Daily Verse & annonces',
-          subtitle:
-              'Édition et planification des versets quotidiens + annonces '
-              'spéciales — Phase 6.',
-          icon: Icons.campaign_outlined,
-          roadmap: 'Phase 6 — Vie spirituelle',
-        ),
+        builder: (_, __) => const PublicationCreatePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.publicationCreate,
+        builder: (_, __) => const PublicationCreatePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.prayerChains,
+        builder: (_, __) => const PrayerChainsPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.prayerChainsBase}/:id',
+        builder: (context, state) =>
+            PrayerChainDetailPage(chainId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.nationalDashboard,

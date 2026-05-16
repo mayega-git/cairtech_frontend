@@ -62,4 +62,77 @@
         ]]></sql>
     </changeSet>
 
+    <!--
+        Lecture des publications et de l'intercession : accessible à tous les
+        rôles "membre" et "leader" (cf cahier — versets et chaîne de prière sont
+        visibles par toute la communauté du BBC).
+    -->
+    <changeSet id="20-publications-intercession-read-grants" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code)
+            SELECT r.id, p.code
+              FROM bbcms_role r
+              CROSS JOIN (VALUES
+                  ('bbcms:publication:read'),
+                  ('bbcms:intercession:read'),
+                  ('bbcms:event:read'),
+                  ('bbcms:evangelism:read'),
+                  ('bbcms:discipleship:read'),
+                  ('bbcms:financial:contribution-read')
+              ) AS p(code)
+             WHERE r.id IN (
+                 '11111111-0000-0000-0000-000000000002', -- NATIONAL_LEADER
+                 '11111111-0000-0000-0000-000000000003', -- BBC_LEADER
+                 '11111111-0000-0000-0000-000000000004', -- CLASS_LEADER
+                 '11111111-0000-0000-0000-000000000005', -- MENTOR
+                 '11111111-0000-0000-0000-000000000006', -- INTERCESSION_LEADER
+                 '11111111-0000-0000-0000-000000000007', -- EVANGELISM_LEADER
+                 '11111111-0000-0000-0000-000000000008', -- DISCIPLE_MAKER
+                 '11111111-0000-0000-0000-000000000009', -- FINANCIAL_LEADER
+                 '11111111-0000-0000-0000-00000000000A', -- DAILY_VERSE_LEADER
+                 '11111111-0000-0000-0000-00000000000B', -- STUDENT
+                 '11111111-0000-0000-0000-00000000000C'  -- PROFESSIONAL
+             )
+            ON CONFLICT (role_id, permission_code) DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <!--
+        Permissions de gestion par leader spécialisé :
+        - INTERCESSION_LEADER + BBC_LEADER → chain-manage
+        - DAILY_VERSE_LEADER + BBC_LEADER → daily-verse + announcement
+        - FINANCIAL_LEADER + BBC_LEADER → contribution-create / record
+        - EVANGELISM_LEADER + BBC_LEADER → program-create / record-create
+        - DISCIPLE_MAKER → record-create + assign
+    -->
+    <changeSet id="20-leader-domain-grants" author="bbcms">
+        <sql><![CDATA[
+            -- Intercession leader + BBC leader
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+                ('11111111-0000-0000-0000-000000000006','bbcms:intercession:chain-manage'),
+                ('11111111-0000-0000-0000-000000000006','bbcms:intercession:meeting-organize'),
+                ('11111111-0000-0000-0000-000000000006','bbcms:intercession:member-manage'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:intercession:chain-manage'),
+                -- Daily verse leader + BBC leader
+                ('11111111-0000-0000-0000-00000000000A','bbcms:publication:daily-verse'),
+                ('11111111-0000-0000-0000-00000000000A','bbcms:publication:announcement'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:publication:daily-verse'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:publication:announcement'),
+                -- Financial leader + BBC leader
+                ('11111111-0000-0000-0000-000000000009','bbcms:financial:contribution-create'),
+                ('11111111-0000-0000-0000-000000000009','bbcms:financial:contribution-record'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:financial:contribution-create'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:financial:contribution-record'),
+                -- Evangelism leader + BBC leader
+                ('11111111-0000-0000-0000-000000000007','bbcms:evangelism:program-create'),
+                ('11111111-0000-0000-0000-000000000007','bbcms:evangelism:record-create'),
+                ('11111111-0000-0000-0000-000000000007','bbcms:discipleship:assign'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:evangelism:program-create'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:evangelism:record-create'),
+                -- Disciple maker
+                ('11111111-0000-0000-0000-000000000008','bbcms:discipleship:record-create')
+            ON CONFLICT (role_id, permission_code) DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
 </databaseChangeLog>

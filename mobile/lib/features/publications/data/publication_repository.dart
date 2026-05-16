@@ -41,4 +41,54 @@ class PublicationRepository {
         .map((e) => AnnouncementDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<DailyVerseDto> draftVerse({
+    required String title,
+    required String reference,
+    required String verseText,
+    String? reflectionText,
+    String? imageFileId,
+    required String publishDate,
+    String audience = 'CHF',
+  }) async {
+    final res = await client.dio.post('/publications/daily-verses', data: {
+      'title': title,
+      'reference': reference,
+      'verseText': verseText,
+      if (reflectionText != null) 'reflectionText': reflectionText,
+      if (imageFileId != null) 'imageFileId': imageFileId,
+      'publishDate': publishDate,
+      'audience': audience,
+    });
+    return DailyVerseDto.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<DailyVerseDto> publishVerse(String id) async {
+    final res = await client.dio.post('/publications/daily-verses/$id/publish');
+    return DailyVerseDto.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<AnnouncementDto> draftAnnouncement({
+    required String title,
+    required String content,
+    String? imageFileId,
+    required String type, // BIRTHDAY / CONGRESS / SUMMIT / OBITUARY / OTHER
+    required String publishDate,
+    String audience = 'CHF',
+  }) async {
+    final res = await client.dio.post('/publications/announcements', data: {
+      'title': title,
+      'content': content,
+      if (imageFileId != null) 'imageFileId': imageFileId,
+      'type': type,
+      'publishDate': publishDate,
+      'audience': audience,
+    });
+    return AnnouncementDto.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<AnnouncementDto> publishAnnouncement(String id) async {
+    final res = await client.dio.post('/publications/announcements/$id/publish');
+    return AnnouncementDto.fromJson(res.data as Map<String, dynamic>);
+  }
 }
