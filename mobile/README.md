@@ -106,7 +106,7 @@ flutter test
 | 4 | Réunions (liste, détail, créer, démarrer/finir/annuler/pointer + photos) | ✅ DONE |
 | 5 | Membres + Demandes d'adhésion (annuaire, fiche, approve/reject) | ✅ DONE |
 | 6 | Vie spirituelle (verset/annonces + chaîne de prière 24h) | ✅ DONE |
-| 7 | Finance                                | ⏳     |
+| 7 | Finance (contributions, versements 4 canaux, % objectif) | ✅ DONE |
 | 8 | Évangélisation + Discipulat            | ⏳     |
 | 9 | Événements nationaux                   | ⏳     |
 | 10| Profil & Paramètres                    | ⏳     |

@@ -15,6 +15,8 @@ import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
 import '../../features/members/presentation/member_detail_page.dart';
 import '../../features/members/presentation/members_tab.dart';
+import '../../features/finance/presentation/contribution_detail_page.dart';
+import '../../features/finance/presentation/finance_page.dart';
 import '../../features/intercession/presentation/prayer_chain_detail_page.dart';
 import '../../features/intercession/presentation/prayer_chains_page.dart';
 import '../../features/membership_requests/presentation/membership_requests_page.dart';
@@ -62,6 +64,7 @@ class AppRoutes {
   static const evangelism = '/evangelism';
   static const discipleship = '/discipleship';
   static const finance = '/finance';
+  static const financeBase = '/finance';
   static const publications = '/publications';
   static const nationalDashboard = '/admin/dashboard';
 }
@@ -231,15 +234,12 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.finance,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'COLLECTES',
-          title: 'Finance',
-          subtitle:
-              'Contributions, versements (Cash/MTN/Orange/Virement), '
-              '% objectif — Phase 7.',
-          icon: Icons.account_balance_wallet_outlined,
-          roadmap: 'Phase 7 — Finance',
-        ),
+        builder: (_, __) => const FinancePage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.financeBase}/:id',
+        builder: (context, state) =>
+            ContributionDetailPage(contributionId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.publications,
