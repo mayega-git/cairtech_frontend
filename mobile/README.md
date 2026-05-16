@@ -103,7 +103,7 @@ flutter test
 | 1 | Auth + Onboarding (4 étapes + photo, forgot/reset/change/activation) | ✅ DONE |
 | 2 | Shell de navigation (TabBar 5 onglets + drawer leader + stubs features) | ✅ DONE |
 | 3 | Dashboards (membre / leader / national, données réelles)| ✅ DONE |
-| 4 | Réunions                               | ⏳     |
+| 4 | Réunions (liste, détail, créer, démarrer/finir/annuler/pointer + photos) | ✅ DONE |
 | 5 | Membres + Demandes d'adhésion          | ⏳     |
 | 6 | Vie spirituelle                        | ⏳     |
 | 7 | Finance                                | ⏳     |

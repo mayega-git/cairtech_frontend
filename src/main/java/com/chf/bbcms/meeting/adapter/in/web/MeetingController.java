@@ -79,6 +79,35 @@ public class MeetingController {
         return useCase.listByBibleClub(bibleClubId).map(MeetingResponse::from);
     }
 
+    @GetMapping("/{id}/presences")
+    @PreAuthorize("hasAuthority('bbcms:meeting:read')")
+    public reactor.core.publisher.Flux<PresenceResponse> presences(@PathVariable UUID id) {
+        return useCase.listPresences(id).map(PresenceResponse::from);
+    }
+
+    @GetMapping("/{id}/pictures")
+    @PreAuthorize("hasAuthority('bbcms:meeting:read')")
+    public reactor.core.publisher.Flux<PictureResponse> pictures(@PathVariable UUID id) {
+        return useCase.listPictures(id).map(PictureResponse::from);
+    }
+
+    public record PresenceResponse(UUID id, UUID memberId, UUID visitorId,
+                                    java.time.Instant presentAt, String role) {
+        static PresenceResponse from(com.chf.bbcms.meeting.domain.MeetingPresence p) {
+            return new PresenceResponse(p.getId(),
+                    p.getMemberId().orElse(null),
+                    p.getVisitorId().orElse(null),
+                    p.getPresentAt(),
+                    p.getRole().name());
+        }
+    }
+
+    public record PictureResponse(UUID id, UUID fileId, String caption, java.time.Instant takenAt) {
+        static PictureResponse from(com.chf.bbcms.meeting.domain.MeetingPicture p) {
+            return new PictureResponse(p.id(), p.fileId(), p.caption(), p.takenAt());
+        }
+    }
+
     public record PlanRequest(
             @NotBlank String title, @NotNull MeetingType type,
             UUID bibleClubId, UUID levelId,

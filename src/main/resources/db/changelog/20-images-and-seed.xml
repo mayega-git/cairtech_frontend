@@ -17,4 +17,49 @@
         </addColumn>
     </changeSet>
 
+    <!--
+        Ajoute au rôle BBC_LEADER les permissions de cycle de vie d'une réunion
+        (UC-MEET-01 et UC-MEET-02 du cahier de conception) — le seed initial
+        n'incluait que `meeting:plan` et `meeting:read`.
+        INSERT idempotent (ON CONFLICT DO NOTHING).
+    -->
+    <changeSet id="20-bbc-leader-meeting-grants" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+                ('11111111-0000-0000-0000-000000000003','bbcms:meeting:start'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:meeting:end'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:meeting:record'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:meeting:cancel'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:meeting:notify'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:member:read'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:member:create'),
+                ('11111111-0000-0000-0000-000000000003','bbcms:member:update')
+            ON CONFLICT (role_id, permission_code) DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
+    <!--
+        Permissions miroir pour CLASS_LEADER (président/VP de classe) — voir
+        Acteurs UC-MEET-01.
+    -->
+    <changeSet id="20-class-leader-meeting-grants" author="bbcms">
+        <sql><![CDATA[
+            INSERT INTO bbcms_role_permission (role_id, permission_code) VALUES
+                ('11111111-0000-0000-0000-000000000004','bbcms:auth:login'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:auth:logout'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:auth:refresh'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:user-account:read-self'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:bible-club:read'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:level:read'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:member:read'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:plan'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:start'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:end'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:record'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:cancel'),
+                ('11111111-0000-0000-0000-000000000004','bbcms:meeting:read')
+            ON CONFLICT (role_id, permission_code) DO NOTHING;
+        ]]></sql>
+    </changeSet>
+
 </databaseChangeLog>

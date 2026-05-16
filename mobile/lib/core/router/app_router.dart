@@ -9,6 +9,9 @@ import '../../features/auth/presentation/forgot_password_page.dart';
 import '../../features/auth/presentation/login_page.dart';
 import '../../features/auth/presentation/reset_password_page.dart';
 import '../../features/dashboard/presentation/home_tab.dart';
+import '../../features/meetings/presentation/meeting_attendance_page.dart';
+import '../../features/meetings/presentation/meeting_create_page.dart';
+import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
 import '../../features/members/presentation/members_tab.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
@@ -33,6 +36,8 @@ class AppRoutes {
   // Tabs (shell)
   static const home = '/home';
   static const meetings = '/meetings';
+  static const meetingsBase = '/meetings';
+  static const meetingCreate = '/meetings/new';
   static const members = '/members';
   static const spiritual = '/spiritual';
   static const profile = '/profile';
@@ -146,6 +151,20 @@ GoRouter buildRouter() {
       GoRoute(
         path: AppRoutes.changePassword,
         builder: (_, __) => const ChangePasswordPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.meetingCreate,
+        builder: (_, __) => const MeetingCreatePage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.meetingsBase}/:id',
+        builder: (context, state) =>
+            MeetingDetailPage(meetingId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '${AppRoutes.meetingsBase}/:id/record',
+        builder: (context, state) =>
+            MeetingAttendancePage(meetingId: state.pathParameters['id']!),
       ),
 
       // ── Leader stubs (drawer destinations) ─────────────────────────

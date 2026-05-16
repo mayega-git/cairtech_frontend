@@ -1,5 +1,6 @@
 package com.chf.bbcms.shared.outbox;
 
+import io.r2dbc.postgresql.codec.Json;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -7,6 +8,12 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Entry persistée dans `bbcms_domain_event` (outbox transactionnelle).
+ * `payload_json` est de type PostgreSQL JSONB ; on utilise le type natif
+ * R2DBC `io.r2dbc.postgresql.codec.Json` côté Java pour permettre au driver
+ * d'effectuer le binding correct.
+ */
 @Table("bbcms_domain_event")
 public class OutboxEntry {
 
@@ -20,7 +27,7 @@ public class OutboxEntry {
     private UUID aggregateId;
 
     @Column("payload_json")
-    private String payloadJson;
+    private Json payloadJson;
 
     @Column("created_at")
     private Instant createdAt;
@@ -41,7 +48,7 @@ public class OutboxEntry {
         OutboxEntry e = new OutboxEntry();
         e.type = type;
         e.aggregateId = aggregateId;
-        e.payloadJson = payloadJson;
+        e.payloadJson = Json.of(payloadJson);
         e.createdAt = Instant.now();
         e.processed = false;
         e.attempts = 0;
@@ -51,7 +58,9 @@ public class OutboxEntry {
     public UUID getId() { return id; }
     public String getType() { return type; }
     public UUID getAggregateId() { return aggregateId; }
-    public String getPayloadJson() { return payloadJson; }
+    public String getPayloadJson() {
+        return payloadJson == null ? null : payloadJson.asString();
+    }
     public Instant getCreatedAt() { return createdAt; }
     public boolean isProcessed() { return processed; }
     public Instant getProcessedAt() { return processedAt; }

@@ -1,6 +1,8 @@
 package com.chf.bbcms.meeting.application.port.in;
 
 import com.chf.bbcms.meeting.domain.Meeting;
+import com.chf.bbcms.meeting.domain.MeetingPicture;
+import com.chf.bbcms.meeting.domain.MeetingPresence;
 import com.chf.bbcms.meeting.domain.MeetingType;
 import com.chf.bbcms.meeting.domain.PresenceRole;
 import reactor.core.publisher.Flux;
@@ -20,6 +22,8 @@ public interface ManageMeetingUseCase {
     Mono<Meeting> cancel(UUID meetingId);
     Mono<Meeting> findById(UUID meetingId);
     Flux<Meeting> listByBibleClub(UUID bibleClubId);
+    Flux<MeetingPresence> listPresences(UUID meetingId);
+    Flux<MeetingPicture> listPictures(UUID meetingId);
 
     record PlanMeetingCommand(
             String title, MeetingType type,

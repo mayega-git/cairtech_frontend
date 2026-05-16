@@ -95,6 +95,16 @@ public class MeetingService implements ManageMeetingUseCase {
         return repository.findByBibleClub(bibleClubId);
     }
 
+    @Override
+    public reactor.core.publisher.Flux<com.chf.bbcms.meeting.domain.MeetingPresence> listPresences(UUID meetingId) {
+        return repository.findPresences(meetingId);
+    }
+
+    @Override
+    public reactor.core.publisher.Flux<com.chf.bbcms.meeting.domain.MeetingPicture> listPictures(UUID meetingId) {
+        return repository.findPictures(meetingId);
+    }
+
     private Mono<Meeting> load(UUID id) {
         return repository.findById(id).switchIfEmpty(Mono.error(new NotFoundException("Meeting", id)));
     }

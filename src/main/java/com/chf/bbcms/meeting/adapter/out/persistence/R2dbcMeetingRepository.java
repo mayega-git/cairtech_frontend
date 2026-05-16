@@ -105,17 +105,39 @@ public class R2dbcMeetingRepository implements MeetingRepository {
         Mono<Void> deleteOld = client.sql("DELETE FROM bbcms_meeting_presence WHERE meeting_id = :id")
                 .bind("id", meetingId).then();
         return deleteOld.thenMany(Flux.fromIterable(presences)
-                .flatMap(p -> client.sql("""
-                                INSERT INTO bbcms_meeting_presence(meeting_id, member_id, visitor_id, present_at, role)
-                                VALUES (:m, :mb, :v, :pa, :r)
-                                """)
-                        .bind("m", meetingId)
-                        .bind("mb", p.getMemberId().orElse(null))
-                        .bind("v", p.getVisitorId().orElse(null))
-                        .bind("pa", p.getPresentAt())
-                        .bind("r", p.getRole().name())
-                        .then()))
+                .flatMap(p -> {
+                    var spec = client.sql("""
+                                    INSERT INTO bbcms_meeting_presence(meeting_id, member_id, visitor_id, present_at, role)
+                                    VALUES (:m, :mb, :v, :pa, :r)
+                                    """)
+                            .bind("m", meetingId)
+                            .bind("pa", p.getPresentAt())
+                            .bind("r", p.getRole().name());
+                    spec = p.getMemberId().isPresent()
+                            ? spec.bind("mb", p.getMemberId().get())
+                            : spec.bindNull("mb", UUID.class);
+                    spec = p.getVisitorId().isPresent()
+                            ? spec.bind("v", p.getVisitorId().get())
+                            : spec.bindNull("v", UUID.class);
+                    return spec.then();
+                }))
                 .then();
+    }
+
+    @Override
+    public Flux<MeetingPicture> findPictures(UUID meetingId) {
+        return client.sql("""
+                SELECT id, file_id, caption, taken_at FROM bbcms_meeting_picture
+                WHERE meeting_id = :id ORDER BY taken_at ASC NULLS LAST
+                """)
+                .bind("id", meetingId)
+                .map((row, m) -> new MeetingPicture(
+                        row.get("id", UUID.class),
+                        meetingId,
+                        row.get("file_id", UUID.class),
+                        row.get("caption", String.class),
+                        row.get("taken_at", java.time.Instant.class)))
+                .all();
     }
 
     @Override

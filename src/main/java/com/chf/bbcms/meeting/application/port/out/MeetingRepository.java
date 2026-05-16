@@ -20,6 +20,7 @@ public interface MeetingRepository {
 
     Flux<MeetingPresence> findPresences(UUID meetingId);
     Mono<Void> savePresences(UUID meetingId, List<MeetingPresence> presences);
+    Flux<MeetingPicture> findPictures(UUID meetingId);
     Mono<Long> countPicturesByMeeting(UUID meetingId);
     Mono<Void> savePictures(UUID meetingId, List<MeetingPicture> pictures);
 
