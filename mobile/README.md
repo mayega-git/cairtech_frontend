@@ -107,7 +107,7 @@ flutter test
 | 5 | Membres + Demandes d'adhésion (annuaire, fiche, approve/reject) | ✅ DONE |
 | 6 | Vie spirituelle (verset/annonces + chaîne de prière 24h) | ✅ DONE |
 | 7 | Finance (contributions, versements 4 canaux, % objectif) | ✅ DONE |
-| 8 | Évangélisation + Discipulat            | ⏳     |
+| 8 | Évangélisation + Discipulat (UC-EVG-01 + DS-BBCMS-05) | ✅ DONE |
 | 9 | Événements nationaux                   | ⏳     |
 | 10| Profil & Paramètres                    | ⏳     |
 | 11| Admin (CRUD BBC, Reset annuel)         | ⏳     |

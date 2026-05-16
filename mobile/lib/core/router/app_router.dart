@@ -15,6 +15,9 @@ import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
 import '../../features/members/presentation/member_detail_page.dart';
 import '../../features/members/presentation/members_tab.dart';
+import '../../features/discipleship/presentation/discipleship_page.dart';
+import '../../features/evangelism/presentation/evangelism_page.dart';
+import '../../features/evangelism/presentation/evangelism_program_detail_page.dart';
 import '../../features/finance/presentation/contribution_detail_page.dart';
 import '../../features/finance/presentation/finance_page.dart';
 import '../../features/intercession/presentation/prayer_chain_detail_page.dart';
@@ -62,6 +65,7 @@ class AppRoutes {
   static const adminBibleClubs = '/admin/bible-clubs';
   static const events = '/events';
   static const evangelism = '/evangelism';
+  static const evangelismBase = '/evangelism';
   static const discipleship = '/discipleship';
   static const finance = '/finance';
   static const financeBase = '/finance';
@@ -212,25 +216,16 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.evangelism,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'MISSION',
-          title: 'Évangélisation',
-          subtitle:
-              'Programmes, comptes rendus journaliers, objectifs croyants — Phase 8.',
-          icon: Icons.send_outlined,
-          roadmap: 'Phase 8 — Évangélisation + Discipulat',
-        ),
+        builder: (_, __) => const EvangelismPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.evangelismBase}/:id',
+        builder: (context, state) => EvangelismProgramDetailPage(
+            programId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.discipleship,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'MISSION',
-          title: 'Discipulat',
-          subtitle:
-              'Liens disciple ↔ disciple maker, comptes rendus modules — Phase 8.',
-          icon: Icons.menu_book,
-          roadmap: 'Phase 8 — Évangélisation + Discipulat',
-        ),
+        builder: (_, __) => const DiscipleshipPage(),
       ),
       GoRoute(
         path: AppRoutes.finance,
