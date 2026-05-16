@@ -5,6 +5,7 @@ import com.chf.bbcms.identity.application.port.in.ManageMembershipUseCase;
 import com.chf.bbcms.identity.domain.MembershipRequest;
 import com.chf.bbcms.identity.domain.MembershipRequestStatus;
 import jakarta.validation.Valid;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +20,11 @@ import java.util.UUID;
 public class MembershipRequestController {
 
     private final ManageMembershipUseCase useCase;
+    private final DatabaseClient client;
 
-    public MembershipRequestController(ManageMembershipUseCase useCase) {
+    public MembershipRequestController(ManageMembershipUseCase useCase, DatabaseClient client) {
         this.useCase = useCase;
+        this.client = client;
     }
 
     @GetMapping
@@ -29,6 +32,48 @@ public class MembershipRequestController {
     public Flux<MembershipRequestResponse> list(
             @RequestParam(value = "status", defaultValue = "PENDING") MembershipRequestStatus status) {
         return useCase.listByStatus(status).map(MembershipRequestResponse::from);
+    }
+
+    /**
+     * Liste enrichie avec les PII du UserAccount (utile pour l'écran
+     * "Demandes d'adhésion" côté leader).
+     */
+    @GetMapping("/with-profile")
+    @PreAuthorize("hasAuthority('bbcms:membership-request:read')")
+    public Flux<MembershipRequestWithProfileResponse> listWithProfile(
+            @RequestParam(value = "status", defaultValue = "PENDING") MembershipRequestStatus status) {
+        return client.sql("""
+                SELECT r.id, r.user_account_id, r.requested_type, r.bible_club_id, r.level_id,
+                       r.profession, r.status, r.decision_by, r.decision_at, r.decision_comment,
+                       r.created_at,
+                       u.email, u.first_names, u.next_names, u.gender, u.date_of_birth,
+                       u.picture_file_id, u.phone
+                  FROM bbcms_membership_request r
+                  JOIN bbcms_user_account u ON u.id = r.user_account_id
+                 WHERE r.status = :status
+                 ORDER BY r.created_at DESC
+                """)
+                .bind("status", status.name())
+                .map((row, meta) -> new MembershipRequestWithProfileResponse(
+                        row.get("id", UUID.class),
+                        row.get("user_account_id", UUID.class),
+                        row.get("requested_type", String.class),
+                        row.get("bible_club_id", UUID.class),
+                        row.get("level_id", UUID.class),
+                        row.get("profession", String.class),
+                        row.get("status", String.class),
+                        row.get("decision_by", UUID.class),
+                        row.get("decision_at", Instant.class),
+                        row.get("decision_comment", String.class),
+                        row.get("created_at", Instant.class),
+                        row.get("email", String.class),
+                        row.get("first_names", String.class),
+                        row.get("next_names", String.class),
+                        row.get("gender", String.class),
+                        row.get("date_of_birth", java.time.LocalDate.class),
+                        row.get("picture_file_id", UUID.class),
+                        row.get("phone", String.class)))
+                .all();
     }
 
     @GetMapping("/{id}")
@@ -79,4 +124,12 @@ public class MembershipRequestController {
                     r.getDecisionBy(), r.getDecisionAt(), r.getDecisionComment());
         }
     }
+
+    public record MembershipRequestWithProfileResponse(
+            UUID id, UUID userAccountId, String requestedType,
+            UUID bibleClubId, UUID levelId, String profession,
+            String status, UUID decisionBy, Instant decisionAt, String decisionComment,
+            Instant createdAt,
+            String email, String firstNames, String nextNames, String gender,
+            java.time.LocalDate dateOfBirth, UUID pictureFileId, String phone) {}
 }

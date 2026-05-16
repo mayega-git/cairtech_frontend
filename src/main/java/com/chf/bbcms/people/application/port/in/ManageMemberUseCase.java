@@ -18,6 +18,10 @@ public interface ManageMemberUseCase {
     Mono<Member> findByUserAccount(UUID userAccountId);
     Flux<Member> listByBibleClub(UUID bibleClubId);
 
+    /** Variantes joinées avec le UserAccount (PII) pour les écrans annuaire/fiche. */
+    Mono<MemberWithProfile> findByIdWithProfile(UUID memberId);
+    Flux<MemberWithProfile> listByBibleClubWithProfile(UUID bibleClubId);
+
     Mono<Member> transferLevel(UUID memberId, UUID newLevelId);
     Mono<Member> transferBibleClub(UUID memberId, UUID newBibleClubId, UUID newLevelId);
     Mono<Member> addDepartment(UUID memberId, Department department);

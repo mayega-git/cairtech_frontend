@@ -1,10 +1,26 @@
 import '../../../core/api/dio_client.dart';
 import '../../../core/errors/api_exception.dart';
 import 'member_models.dart';
+import 'member_with_profile_dto.dart';
 
 class MemberRepository {
   final DioClient client;
   MemberRepository(this.client);
+
+  Future<List<MemberWithProfileDto>> listByBibleClubWithProfile(String bibleClubId) async {
+    final res = await client.dio.get(
+      '/members/with-profile',
+      queryParameters: {'bibleClubId': bibleClubId},
+    );
+    return (res.data as List)
+        .map((e) => MemberWithProfileDto.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<MemberWithProfileDto> findByIdWithProfile(String memberId) async {
+    final res = await client.dio.get('/members/$memberId/with-profile');
+    return MemberWithProfileDto.fromJson(res.data as Map<String, dynamic>);
+  }
 
   /// Renvoie le `Member` rattaché à l'utilisateur connecté. `null` si le
   /// compte n'est rattaché à aucun member (visiteur).

@@ -2,6 +2,7 @@ package com.chf.bbcms.people.adapter.in.web;
 
 import com.chf.bbcms.authentication.adapter.in.security.BbcmsAuthenticationToken;
 import com.chf.bbcms.people.application.port.in.ManageMemberUseCase;
+import com.chf.bbcms.people.application.port.in.MemberWithProfile;
 import com.chf.bbcms.people.domain.Department;
 import com.chf.bbcms.people.domain.Member;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -48,6 +51,19 @@ public class MemberController {
     @PreAuthorize("hasAuthority('bbcms:member:read')")
     public Flux<MemberResponse> listByBibleClub(@RequestParam("bibleClubId") UUID bibleClubId) {
         return useCase.listByBibleClub(bibleClubId).map(MemberResponse::from);
+    }
+
+    /** Annuaire enrichi (member + PII de l'UserAccount) — utilisé par l'UI. */
+    @GetMapping("/with-profile")
+    @PreAuthorize("hasAuthority('bbcms:member:read')")
+    public Flux<MemberWithProfileResponse> listWithProfile(@RequestParam("bibleClubId") UUID bibleClubId) {
+        return useCase.listByBibleClubWithProfile(bibleClubId).map(MemberWithProfileResponse::from);
+    }
+
+    @GetMapping("/{id}/with-profile")
+    @PreAuthorize("hasAuthority('bbcms:member:read')")
+    public Mono<MemberWithProfileResponse> getWithProfile(@PathVariable UUID id) {
+        return useCase.findByIdWithProfile(id).map(MemberWithProfileResponse::from);
     }
 
     @PutMapping("/{id}/level")
@@ -102,6 +118,29 @@ public class MemberController {
                     m.getProfession(),
                     m.getProfessionalPosition() == null ? null : m.getProfessionalPosition().name(),
                     m.getStatus().name(), m.getDepartments());
+        }
+    }
+
+    public record MemberWithProfileResponse(
+            UUID id, UUID userAccountId, String kind, UUID bibleClubId, UUID levelId,
+            int participationScore, BigDecimal faithfulPercentage,
+            String profession, String professionalPosition, String status,
+            Set<Department> departments,
+            // PII
+            String email, String firstNames, String nextNames, String gender,
+            LocalDate dateOfBirth, UUID pictureFileId,
+            String accountStatus, String userType
+    ) {
+        static MemberWithProfileResponse from(MemberWithProfile p) {
+            return new MemberWithProfileResponse(
+                    p.memberId(), p.userAccountId(), p.kind(),
+                    p.bibleClubId(), p.levelId(),
+                    p.participationScore(), p.faithfulPercentage(),
+                    p.profession(), p.professionalPosition(),
+                    p.memberStatus(), p.departments(),
+                    p.email(), p.firstNames(), p.nextNames(),
+                    p.gender(), p.dateOfBirth(), p.pictureFileId(),
+                    p.accountStatus(), p.userType());
         }
     }
 }

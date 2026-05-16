@@ -13,7 +13,9 @@ import '../../features/meetings/presentation/meeting_attendance_page.dart';
 import '../../features/meetings/presentation/meeting_create_page.dart';
 import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
+import '../../features/members/presentation/member_detail_page.dart';
 import '../../features/members/presentation/members_tab.dart';
+import '../../features/membership_requests/presentation/membership_requests_page.dart';
 import '../../features/onboarding/presentation/onboarding_page.dart';
 import '../../features/profile/presentation/profile_tab.dart';
 import '../../features/publications/presentation/spiritual_tab.dart';
@@ -39,6 +41,7 @@ class AppRoutes {
   static const meetingsBase = '/meetings';
   static const meetingCreate = '/meetings/new';
   static const members = '/members';
+  static const membersBase = '/members';
   static const spiritual = '/spiritual';
   static const profile = '/profile';
 
@@ -170,15 +173,12 @@ GoRouter buildRouter() {
       // ── Leader stubs (drawer destinations) ─────────────────────────
       GoRoute(
         path: AppRoutes.membershipRequests,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'COMPTES & INSCRIPTIONS',
-          title: 'Demandes d\'adhésion',
-          subtitle:
-              'Liste des demandes en attente, approbation avec assignation '
-              'BBC+niveau, rejet motivé — Phase 5.',
-          icon: Icons.how_to_reg_outlined,
-          roadmap: 'Phase 5 — Membres + Adhésions',
-        ),
+        builder: (_, __) => const MembershipRequestsPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.membersBase}/:id',
+        builder: (context, state) =>
+            MemberDetailPage(memberId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.adminBibleClubs,

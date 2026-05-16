@@ -104,7 +104,7 @@ flutter test
 | 2 | Shell de navigation (TabBar 5 onglets + drawer leader + stubs features) | ✅ DONE |
 | 3 | Dashboards (membre / leader / national, données réelles)| ✅ DONE |
 | 4 | Réunions (liste, détail, créer, démarrer/finir/annuler/pointer + photos) | ✅ DONE |
-| 5 | Membres + Demandes d'adhésion          | ⏳     |
+| 5 | Membres + Demandes d'adhésion (annuaire, fiche, approve/reject) | ✅ DONE |
 | 6 | Vie spirituelle                        | ⏳     |
 | 7 | Finance                                | ⏳     |
 | 8 | Évangélisation + Discipulat            | ⏳     |
