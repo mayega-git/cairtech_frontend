@@ -90,6 +90,11 @@ public class MeetingService implements ManageMeetingUseCase {
     @Override
     public Mono<Meeting> findById(UUID meetingId) { return load(meetingId); }
 
+    @Override
+    public reactor.core.publisher.Flux<Meeting> listByBibleClub(UUID bibleClubId) {
+        return repository.findByBibleClub(bibleClubId);
+    }
+
     private Mono<Meeting> load(UUID id) {
         return repository.findById(id).switchIfEmpty(Mono.error(new NotFoundException("Meeting", id)));
     }

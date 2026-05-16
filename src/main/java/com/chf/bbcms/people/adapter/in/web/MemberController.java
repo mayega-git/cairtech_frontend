@@ -1,11 +1,13 @@
 package com.chf.bbcms.people.adapter.in.web;
 
+import com.chf.bbcms.authentication.adapter.in.security.BbcmsAuthenticationToken;
 import com.chf.bbcms.people.application.port.in.ManageMemberUseCase;
 import com.chf.bbcms.people.domain.Department;
 import com.chf.bbcms.people.domain.Member;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,6 +24,18 @@ public class MemberController {
 
     public MemberController(ManageMemberUseCase useCase) {
         this.useCase = useCase;
+    }
+
+    /**
+     * Profil "member" de l'utilisateur authentifié. Renvoie 404 si le compte
+     * n'est rattaché à aucun Member (visiteur en attente d'approbation).
+     */
+    @GetMapping("/me")
+    public Mono<MemberResponse> me() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> ((BbcmsAuthenticationToken) ctx.getAuthentication()).getUserId())
+                .flatMap(useCase::findByUserAccount)
+                .map(MemberResponse::from);
     }
 
     @GetMapping("/{id}")

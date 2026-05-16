@@ -4,6 +4,8 @@ import com.chf.bbcms.attendance.application.port.out.AttendanceScoreRepository;
 import com.chf.bbcms.dashboard.application.port.in.DashboardUseCase;
 import com.chf.bbcms.finance.application.port.out.FinancialContributionRepository;
 import com.chf.bbcms.finance.domain.ContributionStatus;
+import com.chf.bbcms.meeting.application.port.out.MeetingRepository;
+import com.chf.bbcms.meeting.domain.MeetingStatus;
 import com.chf.bbcms.organization.application.port.out.BibleClubRepository;
 import com.chf.bbcms.organization.domain.BibleClub;
 import com.chf.bbcms.people.application.port.out.MemberRepository;
@@ -11,7 +13,6 @@ import com.chf.bbcms.people.domain.MemberKind;
 import com.chf.bbcms.people.domain.MemberStatus;
 import com.chf.bbcms.shared.domain.NotFoundException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -26,15 +27,18 @@ public class DashboardService implements DashboardUseCase {
     private final MemberRepository memberRepository;
     private final AttendanceScoreRepository scoreRepository;
     private final FinancialContributionRepository financeRepository;
+    private final MeetingRepository meetingRepository;
 
     public DashboardService(BibleClubRepository bibleClubRepository,
                             MemberRepository memberRepository,
                             AttendanceScoreRepository scoreRepository,
-                            FinancialContributionRepository financeRepository) {
+                            FinancialContributionRepository financeRepository,
+                            MeetingRepository meetingRepository) {
         this.bibleClubRepository = bibleClubRepository;
         this.memberRepository = memberRepository;
         this.scoreRepository = scoreRepository;
         this.financeRepository = financeRepository;
+        this.meetingRepository = meetingRepository;
     }
 
     @Override
@@ -70,8 +74,11 @@ public class DashboardService implements DashboardUseCase {
                 .count();
         Mono<List<com.chf.bbcms.finance.domain.FinancialContribution>> contribs =
                 financeRepository.findByBibleClub(bbc.getId()).collectList();
+        Mono<Long> nbRecorded = meetingRepository.findByBibleClub(bbc.getId())
+                .filter(meeting -> meeting.getStatus() == MeetingStatus.RECORDED)
+                .count();
 
-        return Mono.zip(nbMembers, nbFaithful, contribs).map(t -> {
+        return Mono.zip(nbMembers, nbFaithful, contribs, nbRecorded).map(t -> {
             long m = t.getT1();
             long f = t.getT2();
             long active = t.getT3().stream().filter(c -> c.getStatus() == ContributionStatus.OPEN).count();
@@ -80,7 +87,7 @@ public class DashboardService implements DashboardUseCase {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             BigDecimal pct = computePercentage(f, bbc.getGoalNbFaithful());
             return new BibleClubDashboard(bbc.getId(), bbc.getName(), bbc.getStatus().name(),
-                    academicYear, bbc.getGoalNbFaithful(), m, f, pct, 0L, active, total);
+                    academicYear, bbc.getGoalNbFaithful(), m, f, pct, t.getT4(), active, total);
         });
     }
 

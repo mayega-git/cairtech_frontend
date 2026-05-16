@@ -73,6 +73,12 @@ public class MeetingController {
         return useCase.findById(id).map(MeetingResponse::from);
     }
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('bbcms:meeting:read')")
+    public reactor.core.publisher.Flux<MeetingResponse> list(@RequestParam("bibleClubId") UUID bibleClubId) {
+        return useCase.listByBibleClub(bibleClubId).map(MeetingResponse::from);
+    }
+
     public record PlanRequest(
             @NotBlank String title, @NotNull MeetingType type,
             UUID bibleClubId, UUID levelId,

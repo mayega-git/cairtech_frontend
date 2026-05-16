@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/auth/current_user.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/round_icon_button.dart';
+import '../../meetings/data/meeting_repository.dart';
+import '../../members/data/member_repository.dart';
+import '../../publications/data/publication_repository.dart';
 import '../../shell/presentation/app_shell.dart';
+import '../data/dashboard_repository.dart';
+import 'dashboard_cubit.dart';
+import 'widgets/leader_dashboard.dart';
+import 'widgets/member_dashboard.dart';
+import 'widgets/national_dashboard.dart';
 
-/// Onglet Accueil — affiche le dashboard adapté au rôle de l'utilisateur.
-///
-/// Phase 2 : page d'accueil unifiée avec greeting + accès aux outils leader
-/// via le drawer. Les dashboards spécifiques (member / leader / national)
-/// seront branchés en Phase 3.
 class HomeTabPage extends StatelessWidget {
   const HomeTabPage({super.key});
 
@@ -19,31 +24,65 @@ class HomeTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       bloc: sl<AuthBloc>(),
+      builder: (context, authState) {
+        if (authState is! AuthAuthenticated) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return _HomeContent(user: authState.user);
+      },
+    );
+  }
+}
+
+class _HomeContent extends StatelessWidget {
+  final CurrentUser user;
+  const _HomeContent({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<DashboardCubit>(
+      create: (_) => DashboardCubit(
+        dashboardRepository: DashboardRepository(sl()),
+        memberRepository: MemberRepository(sl()),
+        meetingRepository: MeetingRepository(sl()),
+        publicationRepository: PublicationRepository(sl()),
+        user: user,
+      )..load(),
+      child: _DashboardView(user: user),
+    );
+  }
+}
+
+class _DashboardView extends StatelessWidget {
+  final CurrentUser user;
+  const _DashboardView({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final isNational = user.hasPermission('bbcms:dashboard:national');
+    final isLeader = user.hasPermission('bbcms:dashboard:bbc');
+    return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
-        final user = state is AuthAuthenticated ? state.user : null;
-        final isNational = user?.hasPermission('bbcms:dashboard:national') ?? false;
-        final isLeader = user?.hasPermission('bbcms:dashboard:bbc') ?? false;
         return Column(
           children: [
             HomeGreetingHeader(
               actions: [
                 RoundIconButton(
-                    onTap: () {}, child: const Icon(Icons.search, size: 15)),
+                  onTap: () => context.read<DashboardCubit>().load(),
+                  child: const Icon(Icons.refresh, size: 15),
+                ),
                 const SizedBox(width: 6),
                 RoundIconButton(
+                  hasBadge: false,
                   onTap: () {},
-                  hasBadge: true,
                   child: const Icon(Icons.notifications_outlined, size: 15),
                 ),
               ],
             ),
             Expanded(
-              child: _PlaceholderDashboard(
-                kind: isNational
-                    ? _Kind.national
-                    : isLeader
-                        ? _Kind.leader
-                        : _Kind.member,
+              child: RefreshIndicator(
+                onRefresh: () => context.read<DashboardCubit>().load(),
+                child: _body(context, state, isNational: isNational, isLeader: isLeader),
               ),
             ),
           ],
@@ -51,70 +90,64 @@ class HomeTabPage extends StatelessWidget {
       },
     );
   }
-}
 
-enum _Kind { member, leader, national }
+  Widget _body(
+    BuildContext context,
+    DashboardState s, {
+    required bool isNational,
+    required bool isLeader,
+  }) {
+    if (s.loading && s.nationalDashboard == null && s.bbcDashboard == null && s.myScore == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (s.error != null && s.bbcDashboard == null && s.nationalDashboard == null && s.myScore == null) {
+      return _errorState(context, s.error!);
+    }
 
-class _PlaceholderDashboard extends StatelessWidget {
-  final _Kind kind;
-  const _PlaceholderDashboard({required this.kind});
+    // Priorité d'affichage : national > leader BBC > membre
+    if (isNational && s.nationalDashboard != null) {
+      return NationalDashboardBody(data: s.nationalDashboard!);
+    }
+    if (isLeader && s.bbcDashboard != null) {
+      return LeaderDashboardBody(
+        dashboard: s.bbcDashboard!,
+        members: s.bbcMembers,
+        meetings: s.bbcMeetings,
+      );
+    }
+    return MemberDashboard(
+      member: s.me,
+      score: s.myScore,
+      verse: s.todayVerse,
+      nextMeeting: s.nextMeeting,
+      bbcDashboard: s.bbcDashboard,
+    );
+  }
 
-  ({String title, String subtitle, IconData icon}) get _info => switch (kind) {
-        _Kind.member => (
-            title: 'Mon parcours de fidélité',
-            subtitle:
-                'Score de fidélité, prochaine réunion, actions rapides — branché en Phase 3.',
-            icon: Icons.trending_up,
+  Widget _errorState(BuildContext context, String msg) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SizedBox(height: 80),
+        const Icon(Icons.warning_amber_outlined,
+            size: 32, color: AppColors.muted),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            msg,
+            textAlign: TextAlign.center,
+            style: AppTypography.sans(size: 13, color: AppColors.muted, height: 1.5),
           ),
-        _Kind.leader => (
-            title: 'Tableau de bord BBC',
-            subtitle:
-                'KPI membres actifs, fidélité, réunions, veille d\'inactivité — Phase 3.',
-            icon: Icons.dashboard_outlined,
-          ),
-        _Kind.national => (
-            title: 'Pilotage national CHF',
-            subtitle:
-                'Total membres, classement BBC, carte des provinces — Phase 3.',
-            icon: Icons.public,
-          ),
-      };
-
-  @override
-  Widget build(BuildContext context) {
-    final i = _info;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.hair),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(i.icon, size: 28, color: AppColors.muted),
-            ),
-            const SizedBox(height: 16),
-            Text(i.title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center),
-            const SizedBox(height: 6),
-            Text(
-              i.subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.muted,
-                    height: 1.5,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
-      ),
+        const SizedBox(height: 16),
+        Center(
+          child: OutlinedButton.icon(
+            onPressed: () => context.read<DashboardCubit>().load(),
+            icon: const Icon(Icons.refresh, size: 14),
+            label: const Text('Réessayer'),
+          ),
+        ),
+      ],
     );
   }
 }
