@@ -63,30 +63,40 @@ public class R2dbcEventRepository implements EventRepository {
     @Override
     public Mono<EventParticipation> saveParticipation(EventParticipation p) {
         if (p.getId() == null) {
-            return client.sql("""
+            var spec = client.sql("""
                     INSERT INTO bbcms_event_participation(event_id, member_id, visitor_id, registered_at, present, present_at)
                     VALUES (:e, :m, :v, :r, :p, :pa)
                     RETURNING id
                     """)
                     .bind("e", p.getEventId())
-                    .bind("m", p.getMemberId().orElse(null))
-                    .bind("v", p.getVisitorId().orElse(null))
                     .bind("r", p.getRegisteredAt())
-                    .bind("p", p.isPresent())
-                    .bind("pa", p.getPresentAt())
+                    .bind("p", p.isPresent());
+            spec = p.getMemberId().isPresent()
+                    ? spec.bind("m", p.getMemberId().get())
+                    : spec.bindNull("m", UUID.class);
+            spec = p.getVisitorId().isPresent()
+                    ? spec.bind("v", p.getVisitorId().get())
+                    : spec.bindNull("v", UUID.class);
+            spec = p.getPresentAt() != null
+                    ? spec.bind("pa", p.getPresentAt())
+                    : spec.bindNull("pa", Instant.class);
+            return spec
                     .map((row, m) -> row.get("id", UUID.class))
                     .one()
                     .map(id -> EventParticipation.rehydrate(id, p.getEventId(), p.getMemberId().orElse(null),
                             p.getVisitorId().orElse(null), p.getRegisteredAt(), p.isPresent(), p.getPresentAt()));
         }
-        return client.sql("""
+        var spec = client.sql("""
                 UPDATE bbcms_event_participation
                 SET present = :p, present_at = :pa
                 WHERE id = :id
                 """)
                 .bind("p", p.isPresent())
-                .bind("pa", p.getPresentAt())
-                .bind("id", p.getId())
+                .bind("id", p.getId());
+        spec = p.getPresentAt() != null
+                ? spec.bind("pa", p.getPresentAt())
+                : spec.bindNull("pa", Instant.class);
+        return spec
                 .then()
                 .thenReturn(p);
     }

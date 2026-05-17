@@ -71,7 +71,11 @@ public class EventService implements ManageEventUseCase {
             if (!e.acceptsEnrollment())
                 return Mono.error(new BusinessRuleViolation("BBCMS_EVENT_BAD_STATE",
                         "Event is not accepting enrollment (status=" + e.getStatus() + ")"));
-            return repository.saveParticipation(EventParticipation.enrollMember(eventId, memberId));
+            // DS-BBCMS-04: l'inscription est idempotente — si déjà inscrit, on
+            // renvoie la participation existante au lieu de tenter un INSERT.
+            return repository.findParticipation(eventId, memberId)
+                    .switchIfEmpty(repository.saveParticipation(
+                            EventParticipation.enrollMember(eventId, memberId)));
         });
     }
 

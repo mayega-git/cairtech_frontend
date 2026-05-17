@@ -108,7 +108,7 @@ flutter test
 | 6 | Vie spirituelle (verset/annonces + chaîne de prière 24h) | ✅ DONE |
 | 7 | Finance (contributions, versements 4 canaux, % objectif) | ✅ DONE |
 | 8 | Évangélisation + Discipulat (UC-EVG-01 + DS-BBCMS-05) | ✅ DONE |
-| 9 | Événements nationaux                   | ⏳     |
+| 9 | Événements nationaux (DS-BBCMS-04, enroll idempotent + image) | ✅ DONE |
 | 10| Profil & Paramètres                    | ⏳     |
 | 11| Admin (CRUD BBC, Reset annuel)         | ⏳     |
 | 12| Polish & i18n                          | ⏳     |

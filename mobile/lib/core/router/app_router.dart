@@ -18,6 +18,9 @@ import '../../features/members/presentation/members_tab.dart';
 import '../../features/discipleship/presentation/discipleship_page.dart';
 import '../../features/evangelism/presentation/evangelism_page.dart';
 import '../../features/evangelism/presentation/evangelism_program_detail_page.dart';
+import '../../features/events/presentation/event_create_page.dart';
+import '../../features/events/presentation/event_detail_page.dart';
+import '../../features/events/presentation/events_page.dart';
 import '../../features/finance/presentation/contribution_detail_page.dart';
 import '../../features/finance/presentation/finance_page.dart';
 import '../../features/intercession/presentation/prayer_chain_detail_page.dart';
@@ -64,6 +67,8 @@ class AppRoutes {
   static const membershipRequests = '/admin/membership-requests';
   static const adminBibleClubs = '/admin/bible-clubs';
   static const events = '/events';
+  static const eventsBase = '/events';
+  static const eventCreate = '/events/new';
   static const evangelism = '/evangelism';
   static const evangelismBase = '/evangelism';
   static const discipleship = '/discipleship';
@@ -206,13 +211,16 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.events,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'ÉVÉNEMENTS NATIONAUX',
-          title: 'Congrès, sommets, conférences',
-          subtitle: 'Planification, inscription, présence — Phase 9.',
-          icon: Icons.event_outlined,
-          roadmap: 'Phase 9 — Événements',
-        ),
+        builder: (_, __) => const EventsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.eventCreate,
+        builder: (_, __) => const EventCreatePage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.eventsBase}/:id',
+        builder: (context, state) =>
+            EventDetailPage(eventId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.evangelism,
