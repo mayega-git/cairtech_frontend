@@ -44,6 +44,9 @@ dependencies:
   # JWT decoding
   jwt_decoder: ^2.0.1
 
+  # QR code (carte de membre)
+  qr_flutter: ^4.1.0
+
   # Google Fonts (fallback for Geist/Instrument Serif)
   google_fonts: ^6.2.1
 
