@@ -15,6 +15,8 @@ import '../../features/meetings/presentation/meeting_detail_page.dart';
 import '../../features/meetings/presentation/meetings_tab.dart';
 import '../../features/members/presentation/member_detail_page.dart';
 import '../../features/members/presentation/members_tab.dart';
+import '../../features/admin/presentation/bible_club_admin_detail_page.dart';
+import '../../features/admin/presentation/bible_clubs_admin_page.dart';
 import '../../features/discipleship/presentation/discipleship_page.dart';
 import '../../features/evangelism/presentation/evangelism_page.dart';
 import '../../features/evangelism/presentation/evangelism_program_detail_page.dart';
@@ -66,6 +68,7 @@ class AppRoutes {
   // Leader / admin routes (drawer)
   static const membershipRequests = '/admin/membership-requests';
   static const adminBibleClubs = '/admin/bible-clubs';
+  static const adminBibleClubsBase = '/admin/bible-clubs';
   static const events = '/events';
   static const eventsBase = '/events';
   static const eventCreate = '/events/new';
@@ -200,14 +203,12 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.adminBibleClubs,
-        builder: (_, __) => const FeatureStubPage(
-          eyebrow: 'ORGANISATION',
-          title: 'Gestion des Bible Clubs',
-          subtitle:
-              'CRUD BBC, niveaux L1..L7, triumvirat, reset annuel — Phase 11.',
-          icon: Icons.school_outlined,
-          roadmap: 'Phase 11 — Admin Leader National',
-        ),
+        builder: (_, __) => const BibleClubsAdminPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.adminBibleClubsBase}/:id',
+        builder: (context, state) =>
+            BibleClubAdminDetailPage(bibleClubId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: AppRoutes.events,

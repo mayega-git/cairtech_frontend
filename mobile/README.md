@@ -110,5 +110,5 @@ flutter test
 | 8 | Évangélisation + Discipulat (UC-EVG-01 + DS-BBCMS-05) | ✅ DONE |
 | 9 | Événements nationaux (DS-BBCMS-04, enroll idempotent + image) | ✅ DONE |
 | 10| Profil & Paramètres (carte QR + photo + settings) | ✅ DONE |
-| 11| Admin (CRUD BBC, Reset annuel)         | ⏳     |
+| 11| Admin (CRUD BBC + niveaux L1..L7 + triumvirat + reset annuel) | ✅ DONE |
 | 12| Polish & i18n                          | ⏳     |
