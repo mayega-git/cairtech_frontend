@@ -5,6 +5,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/bar_progress.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/tag.dart';
@@ -331,8 +332,7 @@ class _EvangelismProgramDetailPageState
   void _toast(String msg) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
-  String _formatApi(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  String _formatApi(DateTime d) => Fmt.isoDate(d);
 
   @override
   Widget build(BuildContext context) {
@@ -460,7 +460,7 @@ class _EvangelismProgramDetailPageState
           Expanded(child: _stat('OBJECTIF', '${p.objectiveBelievers}')),
           Expanded(child: _stat('CRUS', '${p.totalSaved}')),
           Expanded(
-            child: _stat('%', (p.ratio * 100).toStringAsFixed(0)),
+            child: _stat('%', Fmt.amount(p.ratio * 100)),
           ),
         ],
       ),

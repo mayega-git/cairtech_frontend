@@ -5,6 +5,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/bar_progress.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/tag.dart';
@@ -250,7 +251,7 @@ class _ContributionDetailPageState extends State<ContributionDetailPage> {
                         color: Colors.white.withOpacity(0.55))),
               ),
               const Spacer(),
-              Text('${(c.ratio * 100).toStringAsFixed(0)}%',
+              Text(Fmt.percent(c.ratio),
                   style: AppTypography.serif(
                       size: 24,
                       color: Colors.white,
@@ -415,19 +416,12 @@ class _ContributionDetailPageState extends State<ContributionDetailPage> {
         ),
       );
 
-  String _formatDate(DateTime d) {
-    const months = [
-      'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-      'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'
-    ];
-    return '${d.day} ${months[d.month - 1]} ${d.year}';
-  }
+  String _formatDate(DateTime d) => Fmt.dateShort(d);
 
   String _formatAmount(double v) {
-    if (v >= 1000000) return '${(v / 1000000).toStringAsFixed(1)}M';
-    if (v >= 10000) return '${(v / 1000).toStringAsFixed(1)}K';
-    if (v == v.roundToDouble()) return v.toStringAsFixed(0);
-    return v.toStringAsFixed(2);
+    if (v >= 10000) return Fmt.amountCompact(v);
+    if (v == v.roundToDouble()) return Fmt.amount(v);
+    return Fmt.amount(v, decimals: 2);
   }
 }
 

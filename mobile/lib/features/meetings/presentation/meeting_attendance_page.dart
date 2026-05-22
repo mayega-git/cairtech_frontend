@@ -8,6 +8,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/chip_x.dart';
 import '../../../core/widgets/round_icon_button.dart';
@@ -205,14 +206,14 @@ class _MeetingAttendancePageState extends State<MeetingAttendancePage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
           child: TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Pointer un membre…',
-              prefixIcon: const Padding(
+              prefixIcon: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14),
                 child: Icon(Icons.search, size: 16, color: AppColors.muted),
               ),
               prefixIconConstraints:
-                  const BoxConstraints(minWidth: 40, minHeight: 40),
+                  BoxConstraints(minWidth: 40, minHeight: 40),
             ),
             onChanged: (v) => setState(() => _search = v),
           ),
@@ -548,8 +549,7 @@ class _MeetingAttendancePageState extends State<MeetingAttendancePage> {
     return '${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}';
   }
 
-  String _formatDateApi(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  String _formatDateApi(DateTime d) => Fmt.isoDate(d);
 }
 
 class _UploadedPicture {

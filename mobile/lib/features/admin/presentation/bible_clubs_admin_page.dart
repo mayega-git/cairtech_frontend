@@ -13,6 +13,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/screen_header.dart';
 import '../../../core/widgets/tag.dart';
@@ -183,15 +184,13 @@ class _BibleClubsAdminPageState extends State<BibleClubsAdminPage> {
                     return;
                   }
                   try {
-                    final today = DateTime.now();
                     await _repo.create(
                       name: name.text.trim(),
                       schoolName: school.text.trim().isEmpty
                           ? null
                           : school.text.trim(),
                       goalNbFaithful: int.tryParse(goal.text),
-                      dateCreated:
-                          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
+                      dateCreated: Fmt.isoDate(DateTime.now()),
                       imageFileId: imageFileId,
                     );
                     Navigator.pop(ctx, true);

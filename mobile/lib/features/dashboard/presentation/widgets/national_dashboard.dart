@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/bar_progress.dart';
 import '../../../../core/widgets/sparkline.dart';
 import '../../../../core/widgets/tag.dart';
@@ -270,25 +271,9 @@ class NationalDashboardBody extends StatelessWidget {
     );
   }
 
-  String _formatNumber(num n) {
-    final s = n.toString();
-    final reversed = s.split('').reversed.toList();
-    final chunks = <String>[];
-    for (int i = 0; i < reversed.length; i += 3) {
-      chunks.add(reversed.skip(i).take(3).toList().reversed.join());
-    }
-    return chunks.reversed.join(' ');
-  }
+  String _formatNumber(num n) => Fmt.amount(n.toDouble());
 
-  String _formatMoney(double v) {
-    if (v >= 1000000) {
-      return '${(v / 1000000).toStringAsFixed(1)}M';
-    }
-    if (v >= 1000) {
-      return '${(v / 1000).toStringAsFixed(1)}K';
-    }
-    return v.toStringAsFixed(0);
-  }
+  String _formatMoney(double v) => Fmt.amountCompact(v);
 }
 
 class _BBCBubblePainter extends CustomPainter {

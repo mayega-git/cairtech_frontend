@@ -138,7 +138,7 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
                 if (me?.kind == 'STUDENT' && me!.faithfulPercentage >= 50)
                   TagX('FIDÈLE · ${me.faithfulPercentage.round()}%',
                       kind: TagKind.success),
-                if (me?.bibleClubId != null) TagX('BBC ✓', kind: TagKind.accent),
+                if (me?.bibleClubId != null) const TagX('BBC ✓', kind: TagKind.accent),
                 ...u.roles
                     .where((r) =>
                         r != 'STUDENT' &&
@@ -437,7 +437,7 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
   }
 
   String _cardCode(CurrentUser u, MemberWithProfileDto? me) {
-    final prefix = 'BBCMS';
+    const prefix = 'BBCMS';
     final ref = me?.bibleClubId == null
         ? 'CHF'
         : me!.bibleClubId!.substring(0, 3).toUpperCase();
@@ -468,7 +468,7 @@ class _AvatarLarge extends StatelessWidget {
     return Container(
       width: 88,
       height: 88,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.ink,
         shape: BoxShape.circle,
       ),

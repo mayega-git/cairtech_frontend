@@ -209,12 +209,12 @@ class _LoginPageState extends State<LoginPage> {
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2),
                       )
-                    : Row(
+                    : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Se connecter'),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward, size: 14),
+                          Text('Se connecter'),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, size: 14),
                         ],
                       ),
               ),

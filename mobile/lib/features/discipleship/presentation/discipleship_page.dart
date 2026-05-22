@@ -6,6 +6,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/screen_header.dart';
@@ -27,12 +28,6 @@ class _DiscipleshipPageState extends State<DiscipleshipPage> {
 
   Future<_Bundle>? _future;
   MemberDto? _me;
-
-  bool get _canAssign {
-    final s = sl<AuthBloc>().state;
-    if (s is! AuthAuthenticated) return false;
-    return s.user.hasPermission('bbcms:discipleship:assign');
-  }
 
   bool get _canRecord {
     final s = sl<AuthBloc>().state;
@@ -157,8 +152,7 @@ class _DiscipleshipPageState extends State<DiscipleshipPage> {
                   try {
                     await _repo.recordSession(
                       makerId: _me!.id,
-                      dateOccurred:
-                          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                      dateOccurred: Fmt.isoDate(date),
                       theme: theme.text.trim().isEmpty
                           ? null
                           : theme.text.trim(),

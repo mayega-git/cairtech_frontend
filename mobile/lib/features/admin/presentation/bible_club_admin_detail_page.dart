@@ -7,6 +7,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/tag.dart';
 import '../../members/data/member_repository.dart';
@@ -466,10 +467,9 @@ class _BibleClubAdminDetailPageState extends State<BibleClubAdminDetailPage> {
               _resultRow('Fidèles au reset', '${s.nbFaithfulBefore}'),
               _resultRow('Réunions tenues', '${s.nbMeetings}'),
               _resultRow('% objectif atteint',
-                  '${s.percentageReached.toStringAsFixed(2)}%'),
+                  Fmt.percentBase100(s.percentageReached, decimals: 1)),
               if (s.archivedAt != null)
-                _resultRow('Archivé le',
-                    '${s.archivedAt!.day}/${s.archivedAt!.month}/${s.archivedAt!.year}'),
+                _resultRow('Archivé le', Fmt.date(s.archivedAt!)),
               if (s.archiveFileId != null) ...[
                 const SizedBox(height: 8),
                 Text(

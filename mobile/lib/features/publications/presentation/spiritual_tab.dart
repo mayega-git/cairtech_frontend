@@ -36,12 +36,6 @@ class _SpiritualTabPageState extends State<SpiritualTabPage> {
     return s.user.hasPermission('bbcms:publication:daily-verse');
   }
 
-  bool get _canPublishAnnouncement {
-    final s = sl<AuthBloc>().state;
-    if (s is! AuthAuthenticated) return false;
-    return s.user.hasPermission('bbcms:publication:announcement');
-  }
-
   bool get _canSeePrayerChain {
     final s = sl<AuthBloc>().state;
     if (s is! AuthAuthenticated) return false;

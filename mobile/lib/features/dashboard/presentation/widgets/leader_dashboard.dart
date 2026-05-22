@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/avatar.dart';
 import '../../../../core/widgets/bar_progress.dart';
 import '../../../../core/widgets/kpi_card.dart';
@@ -197,7 +198,7 @@ class LeaderDashboardBody extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${(pct * 100).toStringAsFixed(0)}%',
+                Fmt.percent(pct),
                 style: AppTypography.serif(
                     size: 22, color: Colors.white, letterSpacing: -0.3),
               ),

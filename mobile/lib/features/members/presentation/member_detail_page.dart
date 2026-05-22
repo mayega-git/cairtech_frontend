@@ -4,6 +4,7 @@ import '../../../core/di/service_locator.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/tag.dart';
@@ -264,7 +265,7 @@ class _MemberDetailPageState extends State<MemberDetailPage> {
         _kv(Icons.trending_up, 'Score',
             '${m.participationScore} présences'),
         _kv(Icons.checklist_outlined, 'Fidélité',
-            '${m.faithfulPercentage.toStringAsFixed(2)} %'),
+            Fmt.percentBase100(m.faithfulPercentage, decimals: 1)),
         _kv(Icons.school_outlined, 'Type', m.kind),
         if (m.professionalPosition != null)
           _kv(Icons.workspace_premium_outlined, 'Rôle pro',

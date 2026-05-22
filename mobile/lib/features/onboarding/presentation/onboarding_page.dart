@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/api/file_uploader.dart';
 import '../../../core/auth/auth_repository.dart';
@@ -11,6 +10,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../data/public_registry_repository.dart';
 import 'onboarding_cubit.dart';
 import 'widgets/step_indicator.dart';
@@ -536,7 +536,7 @@ class _Step3Profile extends StatelessWidget {
               child: Text(
                 state.dateOfBirth == null
                     ? 'JJ/MM/AAAA'
-                    : DateFormat('dd/MM/yyyy').format(state.dateOfBirth!),
+                    : Fmt.date(state.dateOfBirth!),
                 style: AppTypography.sans(
                   size: 15,
                   color: state.dateOfBirth == null ? AppColors.muted : AppColors.ink,
@@ -632,7 +632,7 @@ class _PhotoPicker extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: photoBytes != null
               ? Image.memory(photoBytes!, fit: BoxFit.cover)
-              : Center(
+              : const Center(
                   child: Icon(Icons.person, size: 38, color: AppColors.muted2),
                 ),
         ),

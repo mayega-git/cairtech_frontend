@@ -22,7 +22,7 @@ class LeaderDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <_LeaderEntry>[
+    const items = <_LeaderEntry>[
       _LeaderEntry(
         icon: Icons.how_to_reg_outlined,
         label: 'Demandes d\'adhésion',
@@ -78,7 +78,9 @@ class LeaderDrawer extends StatelessWidget {
         route: AppRoutes.nationalDashboard,
         permission: 'bbcms:dashboard:national',
       ),
-    ].where((e) => user.hasPermission(e.permission)).toList();
+    ];
+    final visible =
+        items.where((e) => user.hasPermission(e.permission)).toList();
 
     return Drawer(
       backgroundColor: AppColors.bg,
@@ -154,7 +156,7 @@ class LeaderDrawer extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              children: items.map((e) => _drawerItem(context, e)).toList(),
+              children: visible.map((e) => _drawerItem(context, e)).toList(),
             ),
           ),
           const Divider(height: 1),

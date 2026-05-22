@@ -7,6 +7,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/bar_progress.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/screen_header.dart';
@@ -190,7 +191,7 @@ class _EvangelismPageState extends State<EvangelismPage> {
                 Expanded(child: _heroStat('CRUS', '${p.totalSaved}', '')),
                 Expanded(
                   child: _heroStat('%',
-                      (ratio * 100).toStringAsFixed(0), '/100'),
+                      Fmt.amount(ratio * 100), '/100'),
                 ),
               ],
             ),
@@ -281,7 +282,7 @@ class _EvangelismPageState extends State<EvangelismPage> {
                       size: 16, letterSpacing: -0.2),
                 ),
                 const Spacer(),
-                Text('${(p.ratio * 100).toStringAsFixed(0)}%',
+                Text(Fmt.percent(p.ratio),
                     style: AppTypography.mono(
                         size: 11, color: AppColors.muted)),
               ],

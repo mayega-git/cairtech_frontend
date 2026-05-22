@@ -7,6 +7,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/bar_progress.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/screen_header.dart';
@@ -254,7 +255,7 @@ class _FinancePageState extends State<FinancePage> {
                       letterSpacing: 0.8),
                 ),
                 Text(
-                  '${(ratio * 100).toStringAsFixed(0)}%',
+                  Fmt.percent(ratio),
                   style: AppTypography.serif(
                       size: 16, color: Colors.white, letterSpacing: -0.2),
                 ),
@@ -333,7 +334,7 @@ class _FinancePageState extends State<FinancePage> {
                 ),
                 const Spacer(),
                 Text(
-                  '${(ratio * 100).toStringAsFixed(0)} %',
+                  Fmt.percent(ratio),
                   style: AppTypography.serif(
                       size: 16,
                       letterSpacing: -0.2,
@@ -452,9 +453,7 @@ class _FinancePageState extends State<FinancePage> {
                     return;
                   }
                   try {
-                    final today = DateTime.now();
-                    final dateOpen =
-                        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+                    final dateOpen = Fmt.isoDate(DateTime.now());
                     await _repo.openContribution(
                       bibleClubId: _bibleClubId!,
                       title: title.text.trim(),
@@ -647,8 +646,7 @@ class _FinancePageState extends State<FinancePage> {
                       reference: reference.text.trim().isEmpty
                           ? null
                           : reference.text.trim(),
-                      paymentDate:
-                          '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}',
+                      paymentDate: Fmt.isoDate(DateTime.now()),
                     );
                     Navigator.pop(ctx, true);
                   } catch (e) {
@@ -716,10 +714,8 @@ class _FinancePageState extends State<FinancePage> {
   }
 
   String _formatAmount(double v) {
-    if (v >= 1000000) return '${(v / 1000000).toStringAsFixed(1)}M';
-    if (v >= 10000) return '${(v / 1000).toStringAsFixed(1)}K';
-    // Affichage entier ou avec 2 décimales selon valeur
-    if (v == v.roundToDouble()) return v.toStringAsFixed(0);
-    return v.toStringAsFixed(2);
+    if (v >= 10000) return Fmt.amountCompact(v);
+    if (v == v.roundToDouble()) return Fmt.amount(v);
+    return Fmt.amount(v, decimals: 2);
   }
 }

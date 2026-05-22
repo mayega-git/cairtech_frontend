@@ -7,6 +7,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/screen_header.dart';
 import '../../../core/widgets/tag.dart';
@@ -348,11 +349,8 @@ class _PrayerChainsPageState extends State<PrayerChainsPage> {
                       await _repo.draftChain(
                         bibleClubId: _bibleClubId!,
                         title: title.text.trim(),
-                        dateStart:
-                            '${start.year}-${start.month.toString().padLeft(2, '0')}-${start.day.toString().padLeft(2, '0')}',
-                        dateEnd: end == null
-                            ? null
-                            : '${end!.year}-${end!.month.toString().padLeft(2, '0')}-${end!.day.toString().padLeft(2, '0')}',
+                        dateStart: Fmt.isoDate(start),
+                        dateEnd: end == null ? null : Fmt.isoDate(end!),
                       );
                       Navigator.pop(ctx, true);
                     } catch (e) {
