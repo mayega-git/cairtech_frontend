@@ -53,13 +53,19 @@ services:
       - key: BBCMS_JWT_SECRET
         generateValue: true
 
-      # À saisir manuellement dans le Dashboard Render (Environment) après création
-      # du service — jamais commités. Voir docs/RENDER_DEPLOYMENT.md, section
-      # "Gérer les variables sync: false".
+      # OBLIGATOIRES — sans défaut côté code (SuperAdminProperties.java). Si laissées
+      # vides, SuperAdminBootstrap.java saute silencieusement la création du compte
+      # (juste un log.warn, pas d'erreur) : l'app démarre normalement mais personne ne
+      # peut se connecter. À saisir manuellement dans le Dashboard Render (Environment)
+      # après création du service — jamais commités. Voir docs/RENDER_DEPLOYMENT.md,
+      # section "Gérer les variables sync: false".
       - key: BBCMS_SUPER_ADMIN_EMAIL
         sync: false
       - key: BBCMS_SUPER_ADMIN_PASSWORD
         sync: false
+
+      # OPTIONNELLES — défauts "Super"/"Admin" codés en dur (SuperAdminProperties.java).
+      # Purement cosmétique (nom affiché du compte), rien ne casse si vides.
       - key: BBCMS_SUPER_ADMIN_FIRST_NAMES
         sync: false
       - key: BBCMS_SUPER_ADMIN_NEXT_NAMES
