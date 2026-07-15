@@ -29,10 +29,37 @@ class _MembershipRequestsPageState extends State<MembershipRequestsPage> {
   Future<List<MembershipRequestDto>>? _future;
   String _status = 'PENDING';
 
+  // Maps id → nom pour BBC et niveaux
+  Map<String, String> _bbcNames = {};
+  Map<String, String> _levelNames = {};
+
   @override
   void initState() {
     super.initState();
-    _reload();
+    _loadReferentials().then((_) => _reload());
+  }
+
+  Future<void> _loadReferentials() async {
+    try {
+      final bbcs = await _publicRepo.listBibleClubs();
+      final bbcMap = <String, String>{};
+      final levelMap = <String, String>{};
+      for (final bbc in bbcs) {
+        bbcMap[bbc.id] = bbc.name;
+        try {
+          final levels = await _publicRepo.listLevels(bbc.id);
+          for (final l in levels) {
+            levelMap[l.id] = '${l.type} — ${l.name}';
+          }
+        } catch (_) {}
+      }
+      if (mounted) {
+        setState(() {
+          _bbcNames = bbcMap;
+          _levelNames = levelMap;
+        });
+      }
+    } catch (_) {}
   }
 
   void _reload() {
@@ -47,8 +74,6 @@ class _MembershipRequestsPageState extends State<MembershipRequestsPage> {
       _toast('Demande incomplète: BBC ou niveau manquant');
       return;
     }
-    // Pour un étudiant on utilise BBC + niveau demandés (le leader peut
-    // les ajuster via un sélecteur). Pour un professionnel, juste valider.
     final result = await showDialog<_ApprovalResult>(
       context: context,
       builder: (_) => _ApproveDialog(
@@ -182,7 +207,10 @@ class _MembershipRequestsPageState extends State<MembershipRequestsPage> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () async => _reload(),
+                onRefresh: () async {
+                  await _loadReferentials();
+                  _reload();
+                },
                 child: FutureBuilder<List<MembershipRequestDto>>(
                   future: _future,
                   builder: (context, snap) {
@@ -231,6 +259,8 @@ class _MembershipRequestsPageState extends State<MembershipRequestsPage> {
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (_, i) => _RequestCard(
                         r: list[i],
+                        bbcNames: _bbcNames,
+                        levelNames: _levelNames,
                         canApprove: _status == 'PENDING',
                         onApprove: () => _approve(list[i]),
                         onReject: () => _reject(list[i]),
@@ -247,14 +277,19 @@ class _MembershipRequestsPageState extends State<MembershipRequestsPage> {
   }
 }
 
+
 class _RequestCard extends StatelessWidget {
   final MembershipRequestDto r;
+  final Map<String, String> bbcNames;
+  final Map<String, String> levelNames;
   final bool canApprove;
   final VoidCallback onApprove;
   final VoidCallback onReject;
 
   const _RequestCard({
     required this.r,
+    required this.bbcNames,
+    required this.levelNames,
     required this.canApprove,
     required this.onApprove,
     required this.onReject,
@@ -299,8 +334,12 @@ class _RequestCard extends StatelessWidget {
           _kv('Type demandé', _typeLabel(r.requestedType)),
           if (r.profession != null && r.profession!.isNotEmpty)
             _kv('Profession', r.profession!),
-          if (r.bibleClubId != null) _kv('BBC visé', r.bibleClubId!),
-          if (r.levelId != null) _kv('Niveau visé', r.levelId!),
+          if (r.bibleClubId != null)
+            _kv('BBC visé',
+                bbcNames[r.bibleClubId!] ?? r.bibleClubId!.substring(0, 8)),
+          if (r.levelId != null)
+            _kv('Niveau visé',
+                levelNames[r.levelId!] ?? r.levelId!.substring(0, 8)),
           if (r.phone != null && r.phone!.isNotEmpty)
             _kv('Téléphone', r.phone!),
           if (r.decisionComment != null && r.decisionComment!.isNotEmpty)

@@ -1,0 +1,37 @@
+# Secrets / env
+.env
+.env.local
+.env.*.local
+
+# VCS / IDE
+.git
+.gitignore
+.idea
+*.iml
+
+# Backend build artifacts (recompilés dans l'image)
+build/
+.gradle/
+out/
+
+# Mobile: garder uniquement les sources nécessaires au build web
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/flutter_01.log
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+
+# Docs / assets non nécessaires au build
+Design/
+*.pdf
+README.md
+script/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml

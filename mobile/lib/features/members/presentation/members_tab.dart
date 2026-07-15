@@ -57,15 +57,26 @@ class _MembersTabPageState extends State<MembersTabPage> {
     setState(() {});
   }
 
+  String? get _currentUserId {
+    final s = sl<AuthBloc>().state;
+    if (s is AuthAuthenticated) return s.user.userId;
+    return null;
+  }
+
   Iterable<MemberWithProfileDto> _applyFilter(List<MemberWithProfileDto> list) {
+    final currentUserId = _currentUserId;
+    final listWithoutMe = currentUserId != null
+        ? list.where((m) => m.userAccountId != currentUserId).toList()
+        : list;
+
     final filtered = switch (_filter) {
-      _Filter.all => list,
-      _Filter.active => list.where((m) => m.isActive),
-      _Filter.students => list.where((m) => m.kind == 'STUDENT'),
-      _Filter.pros => list.where(
+      _Filter.all => listWithoutMe,
+      _Filter.active => listWithoutMe.where((m) => m.isActive),
+      _Filter.students => listWithoutMe.where((m) => m.kind == 'STUDENT'),
+      _Filter.pros => listWithoutMe.where(
           (m) => m.kind == 'PROFESSIONAL' || m.kind == 'MENTOR'),
-      _Filter.inactive => list.where((m) => m.isInactive),
-      _Filter.leaders => list.where((m) => m.kind == 'NATIONAL_LEADER'),
+      _Filter.inactive => listWithoutMe.where((m) => m.isInactive),
+      _Filter.leaders => listWithoutMe.where((m) => m.kind == 'NATIONAL_LEADER'),
     };
     if (_search.isEmpty) return filtered;
     final q = _search.toLowerCase();

@@ -5,6 +5,7 @@ import com.chf.bbcms.storage.application.port.in.FileStorageUseCase.UploadComman
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -45,6 +46,14 @@ public class FileController {
                                  @RequestParam(value = "ttlSeconds", required = false) Long ttlSeconds) {
         Duration ttl = ttlSeconds == null ? Duration.ofHours(1) : Duration.ofSeconds(ttlSeconds);
         return useCase.presignedUrl(id, ttl).map(UrlResponse::new);
+    }
+
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<Void>> downloadOrRedirect(@PathVariable UUID id) {
+        return useCase.presignedUrl(id, Duration.ofHours(1))
+                .map(url -> ResponseEntity.status(HttpStatus.FOUND)
+                        .location(java.net.URI.create(url))
+                        .build());
     }
 
     @DeleteMapping("/{id}")

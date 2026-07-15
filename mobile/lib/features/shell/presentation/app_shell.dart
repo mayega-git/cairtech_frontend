@@ -183,7 +183,7 @@ class HomeGreetingHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  if (showMenu)
+                  if (showMenu && (Scaffold.maybeOf(context)?.hasDrawer ?? false))
                     IconButton(
                       icon: const Icon(Icons.menu, size: 20),
                       color: AppColors.ink,

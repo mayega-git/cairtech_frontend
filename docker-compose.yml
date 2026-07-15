@@ -35,11 +35,34 @@ services:
       retries: 5
 
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: bbcms-mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "1026:1026"
+      - "8026:8026"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bbcms-app
+    env_file:
+      - .env
+    environment:
+      BBCMS_R2DBC_URL: r2dbc:postgresql://postgres:5432/bbcms
+      BBCMS_JDBC_URL: jdbc:postgresql://postgres:5432/bbcms
+      BBCMS_MINIO_ENDPOINT: http://minio:9000
+      BBCMS_SMTP_HOST: mailhog
+      BBCMS_SMTP_PORT: 1025
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
 
 volumes:
   bbcms_pg_data:

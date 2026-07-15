@@ -101,7 +101,7 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
 
   Widget _identityCard(CurrentUser u, MemberWithProfileDto? me) {
     final pictureUrl = me?.pictureFileId != null
-        ? '${ApiConfig.apiBase}/files/${me!.pictureFileId}/url'
+        ? '${ApiConfig.apiBase}/files/${me!.pictureFileId}'
         : null;
 
     return Padding(

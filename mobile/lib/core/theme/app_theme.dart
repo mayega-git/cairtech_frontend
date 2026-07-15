@@ -66,7 +66,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: AppTypography.sans(size: 17, weight: FontWeight.w600),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(

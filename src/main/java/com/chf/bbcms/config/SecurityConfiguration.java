@@ -63,7 +63,19 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                // Flutter web build bundled as Spring static resources (classpath:/static/)
+                                "/",
+                                "/index.html",
+                                "/favicon.png",
+                                "/manifest.json",
+                                "/version.json",
+                                "/flutter.js",
+                                "/flutter_bootstrap.js",
+                                "/main.dart.js",
+                                "/assets/**",
+                                "/canvaskit/**",
+                                "/icons/**"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )

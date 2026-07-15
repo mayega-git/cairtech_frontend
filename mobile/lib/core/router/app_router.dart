@@ -81,11 +81,15 @@ class AppRoutes {
   static const nationalDashboard = '/admin/dashboard';
 }
 
+/// Clé root globale — requise pour que GoRouter résolve
+/// les routes imbriquées dans [StatefulShellRoute] lors des redirects.
+final _rootNavKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
 GoRouter buildRouter() {
   final auth = sl<AuthBloc>();
-  final shellNavKey = GlobalKey<NavigatorState>();
 
   return GoRouter(
+    navigatorKey: _rootNavKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: _BlocListenable(auth.stream),
     redirect: (context, state) {
@@ -136,7 +140,6 @@ GoRouter buildRouter() {
 
       // ── Authenticated shell (5 tabs) ───────────────────────────────
       StatefulShellRoute.indexedStack(
-        parentNavigatorKey: shellNavKey,
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           StatefulShellBranch(routes: [

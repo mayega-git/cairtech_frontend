@@ -10,6 +10,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/round_icon_button.dart';
 import '../../../core/widgets/tag.dart';
+import '../../../core/widgets/avatar.dart';
 import '../../members/data/member_repository.dart';
 import '../../members/data/member_with_profile_dto.dart';
 import '../data/bible_clubs_admin_repository.dart';
@@ -552,7 +553,7 @@ class _BibleClubAdminDetailPageState extends State<BibleClubAdminDetailPage> {
               children: [
                 _statsCard(bbc, b),
                 const SizedBox(height: 12),
-                _levelsCard(bbc, b.levels),
+                _levelsCard(bbc, b.levels, b.members),
                 const SizedBox(height: 12),
                 _triumvirateCard(bbc, b.members),
                 if (_canReset) ...[
@@ -587,7 +588,7 @@ class _BibleClubAdminDetailPageState extends State<BibleClubAdminDetailPage> {
                 children: [
                   CachedNetworkImage(
                     imageUrl:
-                        '${ApiConfig.apiBase}/files/${bbc.imageFileId}/url',
+                        '${ApiConfig.apiBase}/files/${bbc.imageFileId}',
                     fit: BoxFit.cover,
                     placeholder: (_, __) =>
                         Container(color: Colors.white.withOpacity(0.04)),
@@ -729,7 +730,7 @@ class _BibleClubAdminDetailPageState extends State<BibleClubAdminDetailPage> {
         ],
       );
 
-  Widget _levelsCard(BibleClubFullDto bbc, List<LevelDto> levels) {
+  Widget _levelsCard(BibleClubFullDto bbc, List<LevelDto> levels, List<MemberWithProfileDto> members) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -769,34 +770,97 @@ class _BibleClubAdminDetailPageState extends State<BibleClubAdminDetailPage> {
             )
           else
             for (int i = 0; i < levels.length; i++) ...[
-              ListTile(
-                leading: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface2,
-                    border: Border.all(color: AppColors.hair),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
+              Builder(builder: (context) {
+                final levelMembers = members
+                    .where((m) => m.levelId == levels[i].id && m.status == 'ACTIVE' && !m.email.endsWith('@chf.org'))
+                    .toList();
+                return Theme(
+                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+                    leading: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface2,
+                        border: Border.all(color: AppColors.hair),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(levels[i].type,
+                          style: AppTypography.mono(
+                              size: 10,
+                              weight: FontWeight.w600,
+                              color: AppColors.ink,
+                              letterSpacing: 0.6)),
+                    ),
+                    title: Text(levels[i].name,
+                        style: AppTypography.sans(
+                            size: 13.5, weight: FontWeight.w500)),
+                    subtitle: Text(
+                      '${levelMembers.length} membre(s) actif(s)',
+                      style: AppTypography.sans(size: 11.5, color: AppColors.muted),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_canManageLevels && bbc.isActive)
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                size: 18, color: AppColors.muted),
+                            onPressed: () => _deleteLevel(bbc, levels[i]),
+                          ),
+                        const Icon(Icons.expand_more, size: 18, color: AppColors.muted),
+                      ],
+                    ),
+                    children: [
+                      if (levelMembers.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 8, 14, 16),
+                          child: Text(
+                            'Aucun membre actif dans ce niveau.',
+                            style: AppTypography.sans(
+                                size: 12, color: AppColors.muted2).copyWith(
+                                  fontStyle: FontStyle.italic),
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 8),
+                          itemCount: levelMembers.length,
+                          itemBuilder: (context, index) {
+                            final m = levelMembers[index];
+                            final scoreColor = m.isFaithful
+                                ? AppColors.positive
+                                : (m.faithfulPercentage > 0
+                                    ? AppColors.warn
+                                    : AppColors.danger);
+                            return ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 2),
+                              leading: Avatar(
+                                name: m.displayName,
+                                size: AvatarSize.sm,
+                              ),
+                              title: Text(m.displayName,
+                                  style: AppTypography.sans(
+                                      size: 13, weight: FontWeight.w500)),
+                              subtitle: Text(m.email,
+                                  style: AppTypography.sans(
+                                      size: 11, color: AppColors.muted)),
+                              trailing: Text(
+                                '${m.faithfulPercentage.round()}%',
+                                style: AppTypography.serif(
+                                    size: 14, letterSpacing: -0.2, color: scoreColor),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                   ),
-                  alignment: Alignment.center,
-                  child: Text(levels[i].type,
-                      style: AppTypography.mono(
-                          size: 10,
-                          weight: FontWeight.w600,
-                          color: AppColors.ink,
-                          letterSpacing: 0.6)),
-                ),
-                title: Text(levels[i].name,
-                    style: AppTypography.sans(
-                        size: 13.5, weight: FontWeight.w500)),
-                trailing: _canManageLevels && bbc.isActive
-                    ? IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            size: 18, color: AppColors.muted),
-                        onPressed: () => _deleteLevel(bbc, levels[i]),
-                      )
-                    : null,
-              ),
+                );
+              }),
               if (i < levels.length - 1)
                 const Divider(height: 1, color: AppColors.hair2),
             ],

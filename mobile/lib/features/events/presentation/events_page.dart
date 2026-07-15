@@ -188,7 +188,7 @@ class _EventsPageState extends State<EventsPage> {
                 width: double.infinity,
                 child: CachedNetworkImage(
                   imageUrl:
-                      '${ApiConfig.apiBase}/files/${e.imageFileId}/url',
+                      '${ApiConfig.apiBase}/files/${e.imageFileId}',
                   fit: BoxFit.cover,
                   placeholder: (_, __) =>
                       Container(color: Colors.white.withOpacity(0.04)),

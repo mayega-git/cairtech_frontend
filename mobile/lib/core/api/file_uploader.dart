@@ -45,5 +45,5 @@ class FileUploader {
 
   /// URL absolue de récupération (via le proxy backend) — préfère [presignedUrl]
   /// pour avoir un lien direct vers MinIO sans passer par le backend.
-  String backendUrl(String fileId) => '${ApiConfig.apiBase}/files/$fileId/url';
+  String backendUrl(String fileId) => '${ApiConfig.apiBase}/files/$fileId';
 }

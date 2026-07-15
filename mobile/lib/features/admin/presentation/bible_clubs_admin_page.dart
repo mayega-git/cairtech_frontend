@@ -340,7 +340,7 @@ class _BibleClubsAdminPageState extends State<BibleClubsAdminPage> {
               child: b.imageFileId != null
                   ? CachedNetworkImage(
                       imageUrl:
-                          '${ApiConfig.apiBase}/files/${b.imageFileId}/url',
+                          '${ApiConfig.apiBase}/files/${b.imageFileId}',
                       fit: BoxFit.cover,
                       placeholder: (_, __) =>
                           Container(color: AppColors.surface2),

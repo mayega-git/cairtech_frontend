@@ -1,0 +1,95 @@
+# Render Blueprint — équivalent déclaratif de docker-compose.yml pour un déploiement cloud.
+# Render n'exécute pas docker-compose.yml : chaque service y est une ressource Render
+# indépendante. Voir docs/RENDER_DEPLOYMENT.md pour le détail du mapping et la procédure
+# de déploiement.
+#
+# Usage : pousser ce repo sur un remote Git connecté à Render, puis
+# "New +" -> "Blueprint" -> sélectionner le repo -> Render lit ce fichier.
+
+databases:
+  - name: bbcms-db
+    databaseName: bbcms
+    user: bbcms
+    plan: starter
+    region: frankfurt
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: bbcms-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      # Câblé automatiquement depuis la base managée bbcms-db ci-dessus.
+      # L'entrypoint du Dockerfile reconstruit BBCMS_R2DBC_URL/BBCMS_JDBC_URL
+      # à partir de ces 5 valeurs au démarrage du conteneur.
+      - key: BBCMS_DB_HOST
+        fromDatabase:
+          name: bbcms-db
+          property: host
+      - key: BBCMS_DB_PORT
+        fromDatabase:
+          name: bbcms-db
+          property: port
+      - key: BBCMS_DB_NAME
+        fromDatabase:
+          name: bbcms-db
+          property: database
+      - key: BBCMS_DB_USER
+        fromDatabase:
+          name: bbcms-db
+          property: user
+      - key: BBCMS_DB_PASSWORD
+        fromDatabase:
+          name: bbcms-db
+          property: password
+
+      # Généré automatiquement par Render au provisioning (secret aléatoire >= 256 bits).
+      - key: BBCMS_JWT_SECRET
+        generateValue: true
+
+      # À saisir manuellement dans le Dashboard Render (Environment) après création
+      # du service — jamais commités. Voir docs/RENDER_DEPLOYMENT.md, section
+      # "Gérer les variables sync: false".
+      - key: BBCMS_SUPER_ADMIN_EMAIL
+        sync: false
+      - key: BBCMS_SUPER_ADMIN_PASSWORD
+        sync: false
+      - key: BBCMS_SUPER_ADMIN_FIRST_NAMES
+        sync: false
+      - key: BBCMS_SUPER_ADMIN_NEXT_NAMES
+        sync: false
+
+      # Stockage S3-compatible externe (Cloudflare R2 / AWS S3 / Backblaze B2) —
+      # remplace MinIO auto-hébergé, non viable sur le filesystem éphémère de Render.
+      - key: BBCMS_MINIO_ENDPOINT
+        sync: false
+      - key: BBCMS_MINIO_ACCESS_KEY
+        sync: false
+      - key: BBCMS_MINIO_SECRET_KEY
+        sync: false
+      - key: BBCMS_MINIO_BUCKET
+        sync: false
+
+      # Vrai fournisseur SMTP (SendGrid/Mailgun/SES/...) — mailhog est dev-only,
+      # non déployé sur Render.
+      - key: BBCMS_SMTP_HOST
+        sync: false
+      - key: BBCMS_SMTP_PORT
+        sync: false
+
+      # URL publique du service, utilisée dans les emails d'activation/reset.
+      # OPTIONNEL : laisser vide — l'entrypoint du Dockerfile utilise alors
+      # automatiquement RENDER_EXTERNAL_URL (variable injectée par Render,
+      # ex: https://bbcms-app.onrender.com), aucune saisie manuelle requise.
+      # Ne renseigner que si un domaine custom est configuré à la place.
+      - key: BBCMS_FRONTEND_BASE_URL
+        sync: false
+
+      - key: BBCMS_DEV_DATA_ENABLED
+        value: "false"
