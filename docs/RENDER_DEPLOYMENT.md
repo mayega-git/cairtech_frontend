@@ -17,13 +17,39 @@ séparément plutôt que d'être des conteneurs reliés sur un même réseau Doc
 | Service docker-compose | Ressource Render | Pourquoi |
 |---|---|---|
 | `postgres` (conteneur `postgres:16-alpine`) | Postgres managé Render (`databases:` dans `render.yaml`, nom `bbcms-db`) | Backups/failover inclus, pas de volume à gérer soi-même. |
-| `minio` | Stockage S3-compatible externe (Cloudflare R2 / AWS S3 / Backblaze B2 — à choisir) | Render n'a pas d'équivalent S3 natif et son filesystem est éphémère par défaut (disque persistant = option payante par service). Le SDK MinIO déjà utilisé côté backend (`io.minio:minio`) est compatible avec ces fournisseurs sans changement de code : seuls l'endpoint et les clés changent. |
+| `minio` | Stockage S3-compatible externe — **Cloudflare R2** recommandé (10 Go gratuits, zéro frais d'egress ; AWS S3 / Backblaze B2 aussi compatibles) | Voir [Pourquoi pas MinIO auto-hébergé sur Render](#pourquoi-pas-minio-auto-hébergé-sur-render). Le SDK MinIO déjà utilisé côté backend (`io.minio:minio`) est compatible tel quel avec ces fournisseurs — seuls l'endpoint et les clés changent. |
 | `mailhog` | Retiré (dev-only) — vrai fournisseur SMTP | Mailhog capture les emails en local, inutile en prod. |
 | `app` (build du `Dockerfile` local) | Web Service Render, `runtime: docker` (`services:` dans `render.yaml`, nom `bbcms-app`) | Réutilise le même `Dockerfile` multi-stage (Flutter web + Spring Boot jar) déjà utilisé pour le dev/prod local — aucune image séparée à maintenir. |
 
 `docker-compose.yml` n'a pas été modifié : il continue de servir uniquement le dev local
 (postgres + minio + mailhog + app). `render.yaml` est un chemin de déploiement additif et
 indépendant.
+
+## Plan free
+
+`render.yaml` utilise `plan: free` pour `bbcms-db` et `bbcms-app` — **aucune carte
+bancaire n'est requise** pour lancer le Blueprint dans cette configuration. Dès qu'une
+ressource passe en `starter` (ou plus), Render exige qu'une carte soit enregistrée sur le
+compte avant de provisionner quoi que ce soit, même si l'usage réel reste dans le coût du
+plan choisi.
+
+Contreparties du plan free, à accepter en connaissance de cause :
+
+| | Limite |
+|---|---|
+| `bbcms-app` (web service) | Se met en veille après 15 min d'inactivité (~60s pour redémarrer, l'utilisateur voit une page de chargement) ; 750h/mois partagées entre tous les services free du compte. |
+| `bbcms-db` (Postgres) | 1 Go de stockage max ; **expire 30 jours après création**, puis 14 jours de grâce avant suppression définitive (email d'alerte à ces deux échéances) ; pas de backup automatique ; une seule base free par compte Render. |
+
+L'expiration de `bbcms-db` est le point le plus dangereux : si rien n'est fait avant les
+30+14 jours, **toutes les données (comptes, clubs bibliques, etc.) sont perdues**. Pour un
+déploiement de test ou de démo c'est acceptable ; pour un vrai lancement, il faut soit
+upgrader la base à temps (Dashboard → `bbcms-db` → Settings → Change Plan), soit repasser
+tout de suite en `plan: starter` dans `render.yaml` une fois prêt à ajouter une carte.
+
+**Migrer vers starter plus tard** : changer `plan: free` en `plan: starter` pour les deux
+ressources dans `render.yaml`, commit + push (avec `autoDeploy: true`, Render redéploie
+automatiquement) — ou directement dans le Dashboard (Settings → Change Plan) sans repasser
+par Git.
 
 ## Fichiers concernés
 
@@ -50,6 +76,26 @@ permet aucune transformation de chaîne, on câble les composants séparés via
 `fromDatabase` et on reconstruit les deux URLs complètes dans l'entrypoint du conteneur
 au démarrage.
 
+## Pourquoi pas MinIO auto-hébergé sur Render
+
+Une alternative envisagée était de redéployer MinIO tel quel sur Render, en service
+privé (`type: pserv`, image `minio/minio`) avec un disque persistant attaché — évite un
+compte tiers. Écartée pour ce déploiement :
+
+- **Pas d'option gratuite viable** : un disque persistant Render n'existe que sur les
+  plans payants (ni le service `pserv`, ni le disque ne sont gratuits). Sans disque, le
+  contenu du bucket serait perdu à chaque redeploy.
+- **Pas de scaling horizontal** : un service avec disque attaché ne tourne qu'en une
+  seule instance.
+- **Pas de zero-downtime deploy** : le stockage est indisponible pendant chaque
+  redéploiement du service MinIO (coupure de l'instance avant démarrage de la nouvelle).
+- **Durabilité plus faible** : snapshots quotidiens Render (rétention ≥ 7 jours) au lieu
+  de la redondance multi-zone d'un stockage objet managé.
+
+**Cloudflare R2** (retenu) évite tout ça et reste gratuit dans la durée pour ce volume
+d'usage (10 Go gratuits, aucun frais d'egress même au-delà) — sans ajouter de service ni
+de disque payant côté Render. Voir étape 0 ci-dessous pour créer le bucket et les clés.
+
 ## Variables d'environnement du service `bbcms-app`
 
 | Variable | Origine | Action requise |
@@ -58,7 +104,8 @@ au démarrage.
 | `BBCMS_JWT_SECRET` | `generateValue: true` | Aucune — Render génère un secret aléatoire ≥ 256 bits au provisioning. |
 | `BBCMS_SUPER_ADMIN_EMAIL`, `BBCMS_SUPER_ADMIN_PASSWORD` | `sync: false` | **Obligatoire.** Sans défaut côté code — si vides, `SuperAdminBootstrap` saute silencieusement la création du compte (juste un `log.warn`, pas d'erreur) : l'app démarre, healthcheck vert, mais personne ne peut se connecter. |
 | `BBCMS_SUPER_ADMIN_FIRST_NAMES`, `BBCMS_SUPER_ADMIN_NEXT_NAMES` | `sync: false` | Optionnel — défauts codés en dur `"Super"`/`"Admin"` (`SuperAdminProperties.java`). Purement cosmétique si laissées vides. |
-| `BBCMS_MINIO_ENDPOINT`, `BBCMS_MINIO_ACCESS_KEY`, `BBCMS_MINIO_SECRET_KEY`, `BBCMS_MINIO_BUCKET` | `sync: false` | Saisie manuelle avec les identifiants du fournisseur S3-compatible choisi. |
+| `BBCMS_MINIO_ENDPOINT`, `BBCMS_MINIO_ACCESS_KEY`, `BBCMS_MINIO_SECRET_KEY` | `sync: false` | **Obligatoire.** Identifiants obtenus chez le fournisseur S3-compatible (Cloudflare R2 recommandé — voir étape 0). |
+| `BBCMS_MINIO_BUCKET` | `sync: false` | Nom du bucket, ex. `bbcms-media`. Créé automatiquement au démarrage par le backend s'il n'existe pas encore (`MinioFileStorageAdapter.java`), à condition que la clé API ait les droits de création de bucket chez le fournisseur. |
 | `BBCMS_SMTP_HOST`, `BBCMS_SMTP_PORT` | `sync: false` | Saisie manuelle avec les identifiants du vrai fournisseur SMTP. |
 | `BBCMS_FRONTEND_BASE_URL` | `sync: false`, mais auto-résolu par l'entrypoint | **Aucune par défaut.** Render injecte automatiquement `RENDER_EXTERNAL_URL` (URL publique complète, `https://...`) dans tout service web ; l'entrypoint du `Dockerfile` l'utilise si `BBCMS_FRONTEND_BASE_URL` est vide. Ne renseigner manuellement que pour forcer un domaine custom à la place de l'URL `onrender.com`. |
 | `BBCMS_DEV_DATA_ENABLED` | `value: "false"` (fixe) | Aucune — désactive le seed de données de dev en production. |
@@ -103,10 +150,16 @@ Render :
 Le formulaire du Blueprint va te demander ces valeurs d'un coup — les avoir sous la main
 évite les allers-retours :
 
-- **Stockage S3-compatible** (remplace MinIO) : créer un compte + un bucket chez
-  Cloudflare R2 (ou AWS S3 / Backblaze B2), puis générer une clé API. Tu obtiens :
-  `endpoint` (ex. `https://<account-id>.r2.cloudflarestorage.com`), `access key`,
-  `secret key`, `nom du bucket`.
+- **Stockage S3-compatible (Cloudflare R2 recommandé, gratuit)** :
+  1. Compte Cloudflare → **R2** → **Create bucket** → nom du bucket (ex. `bbcms-media`).
+  2. R2 → **Manage API Tokens** → **Create API Token**, permission *Object Read & Write*,
+     scope limité à ce bucket → note l'**Access Key ID** et la **Secret Access Key**
+     (affichées une seule fois).
+  3. Note l'**Account ID** (barre latérale du dashboard Cloudflare) → l'endpoint est
+     `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+  Alternative : Backblaze B2 (10 Go gratuits, egress gratuit jusqu'à 3x le stockage/mois)
+  — mêmes 4 valeurs à récupérer (bucket, access key, secret key, endpoint
+  `https://s3.<region>.backblazeb2.com`).
 - **SMTP réel** (remplace mailhog) : créer un compte chez un fournisseur SMTP
   (SendGrid/Mailgun/SES/…), noter `host` et `port` (ex. `smtp.sendgrid.net` / `587`).
   ⚠️ Voir la limitation "SMTP en production" ci-dessous : `auth`/TLS ne sont pas encore
@@ -131,7 +184,7 @@ auto-rempli, pas de champ à remplir pour elles) :
 | `BBCMS_SUPER_ADMIN_EMAIL` | ton email admin, ex. `admin@chf.org` |
 | `BBCMS_SUPER_ADMIN_PASSWORD` | un mot de passe fort — **obligatoire**, sinon aucun compte admin n'est créé |
 | `BBCMS_SUPER_ADMIN_FIRST_NAMES` / `NEXT_NAMES` | optionnel, laisser vide pour garder "Super Admin" |
-| `BBCMS_MINIO_ENDPOINT` / `ACCESS_KEY` / `SECRET_KEY` / `BUCKET` | les 4 valeurs obtenues à l'étape 0 chez ton fournisseur S3 — **pas** `localhost:9000`/`minioadmin` |
+| `BBCMS_MINIO_ENDPOINT` / `ACCESS_KEY` / `SECRET_KEY` / `BUCKET` | les 4 valeurs obtenues à l'étape 0 chez R2 (ou ton fournisseur S3) — **pas** `localhost:9000`/`minioadmin` |
 | `BBCMS_SMTP_HOST` / `BBCMS_SMTP_PORT` | les valeurs de ton fournisseur SMTP — **pas** `localhost:1025` |
 | `BBCMS_FRONTEND_BASE_URL` | **laisser vide** — auto-résolue via `RENDER_EXTERNAL_URL` |
 
