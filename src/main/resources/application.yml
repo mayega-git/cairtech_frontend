@@ -31,9 +31,11 @@ spring:
   mail:
     host: ${BBCMS_SMTP_HOST:localhost}
     port: ${BBCMS_SMTP_PORT:1025}
+    username: ${BBCMS_SMTP_USERNAME:}
+    password: ${BBCMS_SMTP_PASSWORD:}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail.smtp.auth: ${BBCMS_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${BBCMS_SMTP_STARTTLS:false}
 
 server:
   port: ${BBCMS_PORT:8080}
