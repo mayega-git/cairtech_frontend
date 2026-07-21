@@ -3,6 +3,9 @@ spring:
     name: bbcms
   main:
     banner-mode: console
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
 
   # R2DBC pour les opérations applicatives (réactives)
   r2dbc:
@@ -68,6 +71,11 @@ bbcms:
       bucket: ${BBCMS_MINIO_BUCKET:bbcms-media}
   notification:
     from-email: ${BBCMS_FROM_EMAIL:no-reply@chf.org}
+    email:
+      provider: ${BBCMS_EMAIL_PROVIDER:smtp}
+      brevo:
+        api-key: ${BBCMS_BREVO_API_KEY:}
+        from-name: ${BBCMS_BREVO_FROM_NAME:BBCMS}
     push:
       enabled: false
     sms:

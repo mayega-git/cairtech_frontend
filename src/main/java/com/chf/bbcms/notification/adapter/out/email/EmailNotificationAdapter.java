@@ -5,6 +5,7 @@ import com.chf.bbcms.notification.application.port.out.NotificationPort.Notifica
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(name = "bbcms.notification.email.provider", havingValue = "smtp", matchIfMissing = true)
 public class EmailNotificationAdapter implements EmailSenderPort {
 
     private static final Logger log = LoggerFactory.getLogger(EmailNotificationAdapter.class);
