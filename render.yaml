@@ -6,11 +6,18 @@
 # Usage : pousser ce repo sur un remote Git connecté à Render, puis
 # "New +" -> "Blueprint" -> sélectionner le repo -> Render lit ce fichier.
 
+# plan: free partout ci-dessous => aucune carte bancaire requise pour déployer.
+# Contreparties à connaître (voir docs/RENDER_DEPLOYMENT.md, section "Plan free") :
+#   - bbcms-db : 1 Go max, expire 30 jours après création (+14 jours de grâce),
+#     pas de backup, une seule base free par compte Render.
+#   - bbcms-app : se met en veille après 15 min d'inactivité (~60s pour redémarrer),
+#     750h/mois partagées entre tous les services free du compte.
+# Repasser en "starter" (nécessite une carte) quand ces limites deviennent bloquantes.
 databases:
   - name: bbcms-db
     databaseName: bbcms
     user: bbcms
-    plan: starter
+    plan: free
     region: frankfurt
     postgresMajorVersion: "16"
 
@@ -20,7 +27,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     region: frankfurt
     healthCheckPath: /actuator/health
     autoDeploy: true
@@ -53,20 +60,28 @@ services:
       - key: BBCMS_JWT_SECRET
         generateValue: true
 
-      # À saisir manuellement dans le Dashboard Render (Environment) après création
-      # du service — jamais commités. Voir docs/RENDER_DEPLOYMENT.md, section
-      # "Gérer les variables sync: false".
+      # OBLIGATOIRES — sans défaut côté code (SuperAdminProperties.java). Si laissées
+      # vides, SuperAdminBootstrap.java saute silencieusement la création du compte
+      # (juste un log.warn, pas d'erreur) : l'app démarre normalement mais personne ne
+      # peut se connecter. À saisir manuellement dans le Dashboard Render (Environment)
+      # après création du service — jamais commités. Voir docs/RENDER_DEPLOYMENT.md,
+      # section "Gérer les variables sync: false".
       - key: BBCMS_SUPER_ADMIN_EMAIL
         sync: false
       - key: BBCMS_SUPER_ADMIN_PASSWORD
         sync: false
+
+      # OPTIONNELLES — défauts "Super"/"Admin" codés en dur (SuperAdminProperties.java).
+      # Purement cosmétique (nom affiché du compte), rien ne casse si vides.
       - key: BBCMS_SUPER_ADMIN_FIRST_NAMES
         sync: false
       - key: BBCMS_SUPER_ADMIN_NEXT_NAMES
         sync: false
 
-      # Stockage S3-compatible externe (Cloudflare R2 / AWS S3 / Backblaze B2) —
-      # remplace MinIO auto-hébergé, non viable sur le filesystem éphémère de Render.
+      # Stockage S3-compatible externe (Cloudflare R2 recommandé — 10 Go gratuits,
+      # zéro frais d'egress ; AWS S3 / Backblaze B2 aussi compatibles sans changement
+      # de code). Aucun coût Render supplémentaire, contrairement à un MinIO
+      # auto-hébergé qui nécessiterait un service + un disque payants.
       - key: BBCMS_MINIO_ENDPOINT
         sync: false
       - key: BBCMS_MINIO_ACCESS_KEY
