@@ -4,6 +4,10 @@ spring:
   main:
     banner-mode: console
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
+
   # R2DBC pour les opérations applicatives (réactives)
   r2dbc:
     url: ${BBCMS_R2DBC_URL:r2dbc:postgresql://localhost:5432/bbcms}
