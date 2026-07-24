@@ -4,6 +4,10 @@ spring:
   main:
     banner-mode: console
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
+
   # R2DBC pour les opérations applicatives (réactives)
   r2dbc:
     url: ${BBCMS_R2DBC_URL:r2dbc:postgresql://localhost:5432/bbcms}
@@ -31,9 +35,11 @@ spring:
   mail:
     host: ${BBCMS_SMTP_HOST:localhost}
     port: ${BBCMS_SMTP_PORT:1025}
+    username: ${BBCMS_SMTP_USERNAME:}
+    password: ${BBCMS_SMTP_PASSWORD:}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail.smtp.auth: ${BBCMS_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${BBCMS_SMTP_STARTTLS:false}
 
 server:
   port: ${BBCMS_PORT:8080}
@@ -63,6 +69,11 @@ bbcms:
       bucket: ${BBCMS_MINIO_BUCKET:bbcms-media}
   notification:
     from-email: ${BBCMS_FROM_EMAIL:no-reply@chf.org}
+    email:
+      provider: ${BBCMS_EMAIL_PROVIDER:smtp}
+      brevo:
+        api-key: ${BBCMS_BREVO_API_KEY:}
+        from-name: ${BBCMS_BREVO_FROM_NAME:BBCMS}
     push:
       enabled: false
     sms:
